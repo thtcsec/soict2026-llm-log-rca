@@ -1,0 +1,83 @@
+# ============================================================
+# SOICT 2026 - LLM-Augmented Log Anomaly Detection & RCA
+# .gitignore
+# ============================================================
+
+# --- DATA: Exclude heavy raw log files & archives (at all levels) ---
+data/**/*.log
+data/**/*.gz
+data/**/*.tar
+data/**/*.tar.gz
+data/**/*.zip
+data/**/*.rar
+data/**/*.7z
+data/**/*.bz2
+data/**/*.xz
+data/*.rar
+data/*.zip
+data/*.log
+data/*.gz
+data/*.tar
+
+# Keep processed dataset metadata and README
+!data/raw/.gitkeep
+!data/raw/README.md
+!data/processed/.gitkeep
+!data/processed/README.md
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+.env
+*.env
+
+# --- PyTorch / Model Checkpoints ---
+*.pth
+*.pt
+*.ckpt
+*.bin
+*.safetensors
+models/
+checkpoints/
+
+# --- LaTeX Build Artifacts ---
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.lof
+paper/*.lot
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+paper/*.blg
+paper/*.bbl
+paper/*.bcf
+paper/*.run.xml
+
+# But KEEP the generated PDF for preview
+!paper/soict2026.pdf
+
+# --- Results: Keep figures, exclude large caches ---
+results/**/*.pkl
+results/**/*.npy
+results/**/*.npz
+
+# --- IDE & OS ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini

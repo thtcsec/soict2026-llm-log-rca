@@ -57,9 +57,10 @@ Log anomaly detection has evolved from statistical rule-based techniques to deep
 \caption{Taxonomy and Comparison of Existing Log Anomaly Detection Systems}
 \label{tab_related_work}
 \centering
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{l c c c c}
 \toprule
-\textbf{System / Approach} & \textbf{Parsing Method} & \textbf{Core Detector} & \textbf{Automated RCA} & \textbf{Real-Time Latency} \\
+\textbf{System / Approach} & \textbf{Parsing Method} & \textbf{Core Detector} & \textbf{Automated RCA} & \textbf{Inference Latency} \\
 \midrule
 PCA / Invariant Mining & Fixed Rules & Linear Projection & No & $< 5$~ms \\
 DeepLog \cite{ref_deeplog} & Spell & Stacked LSTM & No & $\approx 24$~ms \\
@@ -67,7 +68,8 @@ LogAnomaly \cite{ref_loganomaly} & FT-Tree & FT-LSTM + Word2Vec & Partial & $\ap
 SwissLog & Drain3 & Attentive Bi-LSTM & No & $\approx 18$~ms \\
 \textbf{Ours (LLM-Augmented)} & \textbf{Drain3 Stream} & \textbf{TCN-Transformer} & \textbf{Yes (LLM Narrator)} & \textbf{$0.0128$~ms + $125$~ms LLM} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 While existing systems focus strictly on computing anomaly scores, our framework incorporates an LLM narration layer to convert raw sequence vectors into human-readable SOC incident playbooks.
@@ -77,7 +79,7 @@ The overall workflow of the proposed system is depicted in Fig.~\ref{fig_arch}.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.88\textwidth]{figures/fig1_architecture.png}
+\includegraphics[width=\textwidth]{figures/fig1_architecture.png}
 \caption{End-to-End LLM-Augmented AIOps Pipeline: Streaming Drain3 Parsing, TCN-Transformer Anomaly Detection, and Foundation Model RCA Narration.}
 \label{fig_arch}
 \end{figure}

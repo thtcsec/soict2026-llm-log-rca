@@ -13,36 +13,41 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 plt.rcParams.update({
     "font.family": "serif",
-    "font.size": 9,
+    "font.size": 10,
     "axes.labelsize": 10,
-    "axes.titlesize": 10,
-    "xtick.labelsize": 8,
-    "ytick.labelsize": 8,
-    "legend.fontsize": 8
+    "axes.titlesize": 11,
+    "xtick.labelsize": 9,
+    "ytick.labelsize": 9,
+    "legend.fontsize": 9
 })
 
 def generate_fig1_architecture():
-    fig, ax = plt.subplots(figsize=(6.5, 2.8))
+    # Wider aspect ratio for clear layout across full page width
+    fig, ax = plt.subplots(figsize=(7.5, 2.2))
+    
     boxes = [
-        ("19.28 GB Raw Log Stream\n(HUFLIT Campus / BGL / HDFS)", 0.12, 0.5, "#1f77b4"),
-        ("Drain3 Online\nLog Parser", 0.36, 0.5, "#ff7f0e"),
-        ("TCN-Transformer\nAutoencoder", 0.60, 0.5, "#2ca02c"),
-        ("LLM RCA Narration\n(Phi-3 / Mistral INT4)", 0.84, 0.5, "#d62728")
+        ("Raw 19.28 GB Logs\n(HUFLIT / BGL / HDFS)", 0.12, 0.5, "#1f77b4"),
+        ("Drain3 Online\nLog Parser", 0.37, 0.5, "#ff7f0e"),
+        ("TCN-Transformer\nAutoencoder", 0.63, 0.5, "#2ca02c"),
+        ("LLM RCA Engine\n(Phi-3 / Mistral INT4)", 0.88, 0.5, "#d62728")
     ]
+    
     for label, x, y, color in boxes:
-        ax.text(x, y, label, ha="center", va="center", bbox=dict(boxstyle="round,pad=0.5", facecolor=color, alpha=0.88, edgecolor="black"), color="white", fontweight="bold", fontsize=7.5)
+        ax.text(x, y, label, ha="center", va="center",
+                bbox=dict(boxstyle="round,pad=0.6", facecolor=color, alpha=0.90, edgecolor="black", lw=1.2),
+                color="white", fontweight="bold", fontsize=8.5)
         
-    arrows = [(0.23, 0.29), (0.47, 0.53), (0.71, 0.77)]
+    arrows = [(0.23, 0.28), (0.47, 0.53), (0.73, 0.77)]
     for start, end in arrows:
         ax.annotate("", xy=(end, 0.5), xytext=(start, 0.5),
-                    arrowprops=dict(arrowstyle="->", lw=1.6, color="black"))
+                    arrowprops=dict(arrowstyle="->,head_width=0.3,head_length=0.5", lw=2.0, color="#333333"))
         
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.axis("off")
-    ax.set_title("Fig. 1. End-to-End LLM-Augmented AIOps Pipeline Architecture", fontweight="bold", pad=8)
+    
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "fig1_architecture.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "fig1_architecture.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
 def generate_fig2_loss():
@@ -55,17 +60,16 @@ def generate_fig2_loss():
     ax.plot(epochs, val_loss, 's--', color='#ff7f0e', linewidth=1.8, label='Validation Loss')
     ax.set_xlabel("Training Epochs")
     ax.set_ylabel("Cross-Entropy Reconstruction Loss")
-    ax.set_title("Fig. 2. Model Loss Convergence over 10 Epochs", fontweight="bold")
+    ax.set_title("Reconstruction Loss Convergence", fontweight="bold")
     ax.grid(True, linestyle=":", alpha=0.6)
     ax.legend(loc="upper right")
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "fig2_tcn_loss.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "fig2_tcn_loss.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
 def generate_fig3_roc_pr():
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6.5, 3.0))
     
-    # ROC Curve
     fpr = np.linspace(0, 1, 100)
     tpr_huflit = 1 - (1 - fpr)**3.5
     tpr_bgl = 1 - (1 - fpr)**3.1
@@ -79,9 +83,8 @@ def generate_fig3_roc_pr():
     ax1.set_ylabel("True Positive Rate (TPR)")
     ax1.set_title("ROC Curves", fontweight="bold")
     ax1.grid(True, linestyle=":", alpha=0.6)
-    ax1.legend(loc="lower right", fontsize=7)
+    ax1.legend(loc="lower right", fontsize=7.5)
     
-    # Precision-Recall Curve
     rec = np.linspace(0, 1, 100)
     prec_huflit = 0.98 - 0.08 * (rec**2)
     prec_bgl = 0.95 - 0.10 * (rec**2)
@@ -94,31 +97,30 @@ def generate_fig3_roc_pr():
     ax2.set_ylabel("Precision")
     ax2.set_title("Precision-Recall Curves", fontweight="bold")
     ax2.grid(True, linestyle=":", alpha=0.6)
-    ax2.legend(loc="lower left", fontsize=7)
+    ax2.legend(loc="lower left", fontsize=7.5)
     
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "fig3_roc_pr_curve.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "fig3_roc_pr_curve.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
 def generate_fig4_triage():
     fig, ax = plt.subplots(figsize=(5.2, 3.0))
     categories = ['Human Manual Triage', 'Traditional AIOps', 'LLM Narration (Ours)']
-    triage_seconds = [924.0, 180.0, 0.125] # 15.4 min = 924 s
+    triage_seconds = [924.0, 180.0, 0.125]
     colors = ['#d62728', '#ff7f0e', '#2ca02c']
     
-    bars = ax.bar(categories, triage_seconds, color=colors, width=0.5, edgecolor='black', alpha=0.85)
+    ax.bar(categories, triage_seconds, color=colors, width=0.5, edgecolor='black', alpha=0.85)
     ax.set_yscale('log')
-    ax.set_ylabel("Mean Triage Time per Incident (Seconds, Log Scale)")
-    ax.set_title("Fig. 4. Incident Triage Latency Comparison", fontweight="bold")
+    ax.set_ylabel("Mean Triage Time (Seconds, Log Scale)")
+    ax.set_title("Incident Triage Latency Comparison", fontweight="bold")
     ax.grid(True, which="both", linestyle=":", alpha=0.5)
     
-    # Annotate bars
-    ax.text(0, 924.0 * 1.3, "15.4 min", ha='center', va='bottom', fontsize=8, fontweight='bold')
-    ax.text(1, 180.0 * 1.3, "3.0 min", ha='center', va='bottom', fontsize=8, fontweight='bold')
-    ax.text(2, 0.125 * 1.5, "125.18 ms", ha='center', va='bottom', fontsize=8, fontweight='bold', color='#2ca02c')
+    ax.text(0, 924.0 * 1.3, "15.4 min", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
+    ax.text(1, 180.0 * 1.3, "3.0 min", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
+    ax.text(2, 0.125 * 1.5, "125.18 ms", ha='center', va='bottom', fontsize=8.5, fontweight='bold', color='#2ca02c')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, "fig4_llm_latency_triage.png"), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, "fig4_llm_latency_triage.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
 if __name__ == "__main__":
@@ -126,4 +128,4 @@ if __name__ == "__main__":
     generate_fig2_loss()
     generate_fig3_roc_pr()
     generate_fig4_triage()
-    print("[+] Successfully generated all 4 high-resolution 300 DPI figures in paper/figures/")
+    print("[+] Successfully re-generated crisp, high-legibility 300 DPI figures.")

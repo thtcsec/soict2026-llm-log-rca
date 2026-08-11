@@ -1,83 +1,134 @@
-# SOICT 2026 - LLM-Augmented Log Anomaly Detection & RCA
+<p align="center">
+  <img src="assets/soict-hust.png" height="80" alt="HUST SOICT Logo" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/hcmus.png" height="80" alt="HCMUS VNU-HCM Logo" />
+</p>
 
-[![Conference](https://img.shields.io/badge/Conference-SOICT%202026-blue.svg)](https://soict.org)
-[![Organizers](https://img.shields.io/badge/Organizers-HUST%20%7C%20VNU--HCMUS-red.svg)](https://soict.org)
-[![Proceedings](https://img.shields.io/badge/Proceedings-Springer%20CCIS-orange.svg)](https://springer.com)
-[![Indexing](https://img.shields.io/badge/Indexing-Scopus%20%7C%20EI%20Compendex-purple.svg)]()
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<h1 align="center">SOICT 2026 — LLM-Augmented Log Anomaly Detection & RCA</h1>
 
-Research artifact repository for paper submitted to **The 15th International Symposium on Information and Communication Technology (SOICT 2026)**, co-organized by **Hanoi University of Science and Technology (HUST - ĐHBK Hà Nội)** and **University of Science, VNU-HCM (HCMUS)**.
+<p align="center">
+  <a href="https://soict.org"><img src="https://img.shields.io/badge/Conference-SOICT%202026-0066CC.svg" alt="Conference" /></a>
+  <a href="https://soict.org"><img src="https://img.shields.io/badge/Organizers-HUST%20%7C%20VNU--HCMUS-CC0000.svg" alt="Organizers" /></a>
+  <a href="https://springer.com"><img src="https://img.shields.io/badge/Proceedings-Springer%20CCIS-FF6600.svg" alt="Proceedings" /></a>
+  <img src="https://img.shields.io/badge/Indexing-Scopus%20%7C%20EI%20Compendex-6A0DAD.svg" alt="Indexing" />
+  <img src="https://img.shields.io/badge/Status-In%20Progress-yellow.svg" alt="Status" />
+</p>
 
 ---
 
 ## 📌 Paper Metadata
 
-- **Title**: *LLM-Augmented Log Anomaly Detection: Automated Root Cause Narration for AIOps using Lightweight Foundation Models on Real-World Campus Infrastructure*
-- **Authors**:
-  - **Trịnh Hoàng Tú** (*Department of Cybersecurity, Faculty of Information Technology, HUFLIT*)
-  - **ThS. Cao Tiến Thành** (*Department of Cybersecurity, Faculty of Information Technology, HUFLIT*)
-- **Track**: *AI Foundations, Foundation Models, and Generative AI* / *Applied AI, Big Data Analytics*
-- **Venue & Dates**: Ho Chi Minh City, Vietnam | December 4–5, 2026
+| Field | Info |
+|---|---|
+| **Title** | *LLM-Augmented Log Anomaly Detection: Automated Root Cause Narration for AIOps using Lightweight Foundation Models on Real-World Campus Infrastructure* |
+| **Track** | AI Foundations, Foundation Models, and Generative AI |
+| **Authors** | Trinh Hoang Tu, ThS. Cao Tiến Thành |
+| **Affiliation** | Faculty of Information Technology, HUFLIT |
+| **Venue** | Ho Chi Minh City, Vietnam — December 4–5, 2026 |
+| **Submission Deadline** | Full Paper: September 16, 2026 |
 
 ---
 
-## 💡 Overview & Architecture
+## 💡 Overview
 
-Modern AIOps platforms require not only detecting log anomalies but also providing instantaneous, actionable **Root Cause Analysis (RCA)** for Security Operations Center (SOC) engineers. This paper introduces an end-to-end framework combining:
-1. **Drain3 Online Log Parsing**: Converts unstructured syslog streams into structured template IDs.
-2. **TCN-Transformer Autoencoder**: Detects complex sequential anomalies at microsecond latency.
-3. **Lightweight LLM RCA Narration Engine**: Fine-tuned Phi-3 / Mistral model generating structured natural language incident reports, severity scores, and remediation steps.
+Modern enterprise campus networks generate massive volumes of heterogeneous, unstructured log streams. While deep learning models achieve high accuracy in sequence anomaly detection, traditional AIOps platforms suffer from a **critical explainability bottleneck**: raw anomaly scores fail to communicate actionable root causes, forcing SOC analysts to manually triage thousands of log messages.
 
-Evaluated on **5GB raw production campus network logs** from HUFLIT alongside standard BGL and HDFS benchmarks.
-
----
-
-## 📁 Repository Structure
+This paper proposes an **end-to-end LLM-Augmented AIOps Framework** with 3 tightly integrated stages:
 
 ```
-soict2026/
-├── data/                    # Dataset directory (5GB raw campus logs + BGL/HDFS)
+[Raw Campus Logs 5GB]
+        │
+        ▼
+┌─────────────────────────────┐
+│  Stage 1: Drain3 Parsing    │  ← Streaming online log template extraction
+└─────────────┬───────────────┘
+              │ Template ID sequences
+              ▼
+┌─────────────────────────────┐
+│  Stage 2: TCN-Transformer   │  ← Hybrid autoencoder anomaly detection
+│  Autoencoder                │
+└─────────────┬───────────────┘
+              │ Anomaly score > threshold
+              ▼
+┌─────────────────────────────┐
+│  Stage 3: LLM RCA Engine    │  ← Phi-3 / Mistral INT4 generates
+│  (Phi-3 / Mistral)          │     Root Cause + Remediation Report
+└─────────────────────────────┘
+```
+
+---
+
+## 📊 Datasets
+
+| Dataset | Source | Size | Scope |
+|---|---|---|---|
+| **HUFLIT Campus Logs** | Internal (5GB raw) | ~5 GB | Real-world enterprise campus syslog |
+| **BGL** | [Loghub/Zenodo](https://github.com/logpai/loghub) | 744 MB | Supercomputer |
+| **HDFS** | [Loghub/Zenodo](https://github.com/logpai/loghub) | 1.58 GB | Distributed cluster |
+| **UNSW-NB15** | [UNSW Research](https://research.unsw.edu.au/projects/unsw-nb15-dataset) | ~100 MB | Network intrusion |
+| **ToN_IoT** | [UNSW Research](https://research.unsw.edu.au/projects/toniot-datasets) | ~900 MB | IoT/IIoT heterogeneous |
+
+---
+
+## 🏗️ Repository Structure
+
+```
+soict2026-llm-log-rca/
+├── assets/                  # Conference logos (HUST SOICT, HCMUS)
+├── data/
+│   ├── raw/                 # Raw log files (excluded from Git via .gitignore)
+│   └── processed/           # Parsed templates & sequence vectors
 ├── prototype/
-│   ├── drain3/              # Log parsing wrapper
-│   ├── pipeline/            # TCN-Transformer model code
-│   └── llm/                 # LLM RCA narration generator
-├── results/                 # Evaluation CSVs & metric tables
-├── paper/                   # Springer CCIS LaTeX source & PDF
+│   ├── drain3/              # Online log parser (log_parser.py)
+│   ├── pipeline/            # TCN-Transformer autoencoder (tcn_transformer.py)
+│   └── llm/                 # LLM RCA narration engine (rca_narration.py)
+├── results/
 │   ├── figures/             # 300 DPI publication graphics
-│   └── soict2026.tex        # Main LaTeX manuscript
-├── requirements.txt         # Dependencies
-├── run.sh                   # 1-Click execution script
-└── README.md
+│   └── tables/              # Evaluation CSV metrics
+├── paper/
+│   ├── soict2026.tex        # Main Springer CCIS LaTeX manuscript
+│   ├── soict2026.pdf        # Compiled preview PDF
+│   └── figures/             # Embedded paper graphics
+├── references/              # Related papers & literature
+├── requirements.txt
+├── run.sh                   # 1-click pipeline execution
+└── soict2026_outline.md     # Detailed research outline & timeline
 ```
 
 ---
 
-## 🚀 Quickstart Guide
+## 🚀 Quickstart
 
 ```bash
-# Clone repository
-git clone https://github.com/thtcsec/soict2026-llm-log-rca.git
-cd soict2026-llm-log-rca
-
-# Install dependencies
+# 1. Install dependencies
 pip install -r requirements.txt
 
-# Run master evaluation pipeline
+# 2. Place raw logs in data/raw/ (see data/raw/README.md)
+
+# 3. Run full pipeline
 bash run.sh
 ```
 
 ---
 
-## 📄 Citation & BibTeX
+## 📄 BibTeX Citation
 
 ```bibtex
 @inproceedings{tu2026soict,
-  title={LLM-Augmented Log Anomaly Detection: Automated Root Cause Narration for AIOps using Lightweight Foundation Models on Real-World Campus Infrastructure},
+  title={LLM-Augmented Log Anomaly Detection: Automated Root Cause Narration for AIOps
+         using Lightweight Foundation Models on Real-World Campus Infrastructure},
   author={Tu, Trinh Hoang and Thanh, Cao Tien},
-  booktitle={Proceedings of the 15th International Symposium on Information and Communication Technology (SOICT 2026)},
+  booktitle={Proceedings of the 15th International Symposium on Information
+             and Communication Technology (SOICT 2026)},
   series={Communications in Computer and Information Science (CCIS)},
   publisher={Springer},
   year={2026},
   address={Ho Chi Minh City, Vietnam}
 }
 ```
+
+---
+
+<p align="center">
+  <i>© 2026 Trinh Hoang Tu · Faculty of Information Technology, HUFLIT · All Rights Reserved</i>
+</p>

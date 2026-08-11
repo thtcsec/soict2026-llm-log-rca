@@ -3,23 +3,17 @@
 # .gitignore
 # ============================================================
 
-# --- DATA: Exclude heavy raw log files & archives (at all levels) ---
-data/**/*.log
-data/**/*.gz
-data/**/*.tar
-data/**/*.tar.gz
-data/**/*.zip
-data/**/*.rar
-data/**/*.7z
-data/**/*.bz2
-data/**/*.xz
+# --- DATA: EXCLUDE ALL RAW AND PROCESSED DATA DIRECTORIES ---
+data/raw/*
+data/processed/*
+data/Thang6.rar
 data/*.rar
 data/*.zip
 data/*.log
-data/*.gz
 data/*.tar
+data/*.gz
 
-# Keep processed dataset metadata and README
+# Keep only gitkeep placeholders
 !data/raw/.gitkeep
 !data/raw/README.md
 !data/processed/.gitkeep
@@ -39,7 +33,6 @@ build/
 venv/
 env/
 .env
-*.env
 
 # --- PyTorch / Model Checkpoints ---
 *.pth
@@ -64,14 +57,7 @@ paper/*.blg
 paper/*.bbl
 paper/*.bcf
 paper/*.run.xml
-
-# But KEEP the generated PDF for preview
 !paper/soict2026.pdf
-
-# --- Results: Keep figures, exclude large caches ---
-results/**/*.pkl
-results/**/*.npy
-results/**/*.npz
 
 # --- IDE & OS ---
 .vscode/

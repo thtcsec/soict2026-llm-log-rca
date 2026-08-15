@@ -21,7 +21,7 @@
 | Field | Info |
 |---|---|
 | **Title** | *LLM-Augmented Log Anomaly Detection: Automated Root Cause Narration for AIOps using Lightweight Foundation Models on Real-World Campus Infrastructure* |
-| **Track** | AI Foundations, Foundation Models, and Generative AI |
+| **Track** | Software Engineering, Trusted Digital Platforms, and Smart Services (Secondary: Applied AI) |
 | **Authors** | Trinh Hoang Tu, ThS. Cao Tiến Thành |
 | **Affiliation** | Faculty of Information Technology, HUFLIT |
 | **Venue** | Ho Chi Minh City, Vietnam — December 4–5, 2026 |
@@ -36,7 +36,7 @@ Modern enterprise campus networks generate massive volumes of heterogeneous, uns
 This paper proposes an **end-to-end LLM-Augmented AIOps Framework** with 3 tightly integrated stages:
 
 ```
-[Raw Campus Logs 5GB]
+[Raw Campus Logs 19.28 GB]
         │
         ▼
 ┌─────────────────────────────┐
@@ -45,14 +45,14 @@ This paper proposes an **end-to-end LLM-Augmented AIOps Framework** with 3 tight
               │ Template ID sequences
               ▼
 ┌─────────────────────────────┐
-│  Stage 2: TCN-Transformer   │  ← Hybrid autoencoder anomaly detection
+│  Stage 2: TCN-Transformer   │  ← Masked sequence autoencoder anomaly detection
 │  Autoencoder                │
 └─────────────┬───────────────┘
               │ Anomaly score > threshold
               ▼
 ┌─────────────────────────────┐
-│  Stage 3: LLM RCA Engine    │  ← Phi-3 / Mistral INT4 generates
-│  (Phi-3 / Mistral)          │     Root Cause + Remediation Report
+│  Stage 3: LLM RCA Engine    │  ← Phi-3 / Mistral INT4 + RAG generates
+│  (Phi-3 / Mistral)          │     Root Cause + Grounded Playbook
 └─────────────────────────────┘
 ```
 
@@ -62,11 +62,10 @@ This paper proposes an **end-to-end LLM-Augmented AIOps Framework** with 3 tight
 
 | Dataset | Source | Size | Scope |
 |---|---|---|---|
-| **HUFLIT Campus Logs** | Internal (5GB raw) | ~5 GB | Real-world enterprise campus syslog |
-| **BGL** | [Loghub/Zenodo](https://github.com/logpai/loghub) | 744 MB | Supercomputer |
-| **HDFS** | [Loghub/Zenodo](https://github.com/logpai/loghub) | 1.58 GB | Distributed cluster |
-| **UNSW-NB15** | [UNSW Research](https://research.unsw.edu.au/projects/unsw-nb15-dataset) | ~100 MB | Network intrusion |
-| **ToN_IoT** | [UNSW Research](https://research.unsw.edu.au/projects/toniot-datasets) | ~900 MB | IoT/IIoT heterogeneous |
+| **HUFLIT Campus Logs** | Internal Production (19.28 GB raw) | 19.28 GB (14.85M lines) | Real-world enterprise campus syslog |
+| **BGL** | [Loghub/Zenodo](https://github.com/logpai/loghub) | 744 MB (4.75M lines) | Supercomputer event logs |
+| **HDFS** | [Loghub/Zenodo](https://github.com/logpai/loghub) | 1.58 GB (11.18M lines) | Distributed cloud storage |
+| **UNSW-NB15** | [UNSW Research](https://research.unsw.edu.au/projects/unsw-nb15-dataset) | ~100 MB (254K lines) | Network security telemetry |
 
 ---
 
@@ -114,16 +113,14 @@ bash run.sh
 ## 📄 BibTeX Citation
 
 ```bibtex
-@inproceedings{tu2026soict,
+@article{tu2026soict,
   title={LLM-Augmented Log Anomaly Detection: Automated Root Cause Narration for AIOps
          using Lightweight Foundation Models on Real-World Campus Infrastructure},
   author={Tu, Trinh Hoang and Thanh, Cao Tien},
-  booktitle={Proceedings of the 15th International Symposium on Information
-             and Communication Technology (SOICT 2026)},
-  series={Communications in Computer and Information Science (CCIS)},
-  publisher={Springer},
+  journal={Manuscript submitted to the 15th International Symposium on Information
+           and Communication Technology (SOICT 2026)},
   year={2026},
-  address={Ho Chi Minh City, Vietnam}
+  note={Under review, Springer CCIS}
 }
 ```
 

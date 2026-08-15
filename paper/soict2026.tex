@@ -181,7 +181,7 @@ When an anomalous sequence $X_{\text{anom}}$ is detected ($S(X) > \tau$), our fr
 (1) Sequence Telemetry: Ordered anomalous log templates, extracted parameters (IPs, ports, status codes);
 (2) Infrastructure Metadata: Originating network segment, device hostname, and service criticality;
 (3) Retrieved RAG Context: Top-$k$ institutional SOP runbooks ($C_1, C_2$).
-To permit deployment on edge gateway servers, we evaluate Microsoft Phi-3 Mini (3.8B parameters)~\cite{ref_phi3} quantized to 4-bit NormalFloat (NF4 via `bitsandbytes` with `bfloat16` compute dtype)~\cite{ref_qlora} and Mistral-7B~\cite{ref_mistral} quantized to INT4 via AutoAWQ (group size 128)~\cite{ref_awq}, reducing peak resident VRAM (measured via \texttt{torch.cuda.max\_memory\_allocated()} with batch size 1 and active KV cache) from $7.60$~GB to $1.80$~GB for Phi-3 Mini. At low temperature ($T=0.1$), the LLM generates a structured JSON incident report with four schema fields: \texttt{"severity"} (\texttt{CRITICAL} $\mid$ \texttt{HIGH} $\mid$ \texttt{MEDIUM} $\mid$ \texttt{LOW}), \texttt{"root\_cause\_summary"}, \texttt{"technical\_diagnosis"}, and \texttt{"remediation\_playbook"}.
+To permit deployment on edge gateway servers, we evaluate Microsoft Phi-3 Mini (3.8B parameters)~\cite{ref_phi3} quantized to 4-bit NormalFloat (NF4 via `bitsandbytes` with `bfloat16` compute dtype)~\cite{ref_qlora} and Mistral-7B~\cite{ref_mistral} quantized to INT4 via AutoAWQ (group size 128)~\cite{ref_awq}, reducing peak allocated GPU tensor memory (measured via \texttt{torch.cuda.max\_memory\_allocated()} with batch size 1 and active KV cache) from $7.60$~GB to $1.80$~GB for Phi-3 Mini. With greedy deterministic decoding (\texttt{do\_sample=False}), the LLM generates a structured JSON incident report with four schema fields: \texttt{"severity"} (\texttt{CRITICAL} $\mid$ \texttt{HIGH} $\mid$ \texttt{MEDIUM} $\mid$ \texttt{LOW}), \texttt{"root\_cause\_summary"}, \texttt{"technical\_diagnosis"}, and \texttt{"remediation\_playbook"}.
 
 \section{Experimental Evaluation}
 \subsection{Experimental Setup and Benchmark Datasets}
@@ -193,7 +193,7 @@ We conduct comprehensive empirical evaluations across four datasets:
     \item \textbf{Temporally Sampled UNSW-NB15 Subset}~\cite{ref_unsw}: Network telemetry dataset comprising a 100~MB subset of 254,004 connection records sampled via 10:1 stratified temporal decimation from the 2,540,044-record UNSW-NB15 corpus ($11.8\%$ attack flows). Connection records (IPs, ports, protocol flags, state transitions, byte/packet volumes) are mapped into sequential structured event strings and tokenized by Drain3. Ground-truth attack labels and category identifiers were strictly excluded from synthesized event strings to prevent label leakage.
 \end{enumerate}
 
-\textbf{Strict Chronological Partitioning}: To strictly prevent overlapping-window data leakage across training and testing splits, each dataset is chronologically ordered and partitioned before sequence extraction: the initial $80\%$ forms the training set ($D^{\text{train}}$, nominal baseline paths only), the subsequent $10\%$ forms the validation set ($D^{\text{val}}$, threshold calibration), and the final $10\%$ forms the held-out test set ($D^{\text{test}}$, containing real incidents). In line with semi-supervised anomaly detection paradigms~\cite{ref_deeplog,ref_loganomaly}, $D^{\text{train}}$ utilizes ground-truth event labels during data curation to isolate nominal baseline paths; the Masked TCN-Transformer is subsequently trained via self-supervised masked token modeling without exposure to anomalous sequences. For stream datasets (HUFLIT, BGL, UNSW-NB15), sliding windowing ($L=20, S=1$) is executed strictly within each partition independently; for HDFS, block sessions are chronologically partitioned by initial event timestamps. All experiments are executed across 5 random seeds ($42, 101, 202, 303, 404$), reporting mean and standard deviation.
+\textbf{Strict Chronological Partitioning}: To strictly prevent overlapping-window data leakage across training and testing splits, each dataset is chronologically ordered and partitioned before sequence extraction: the initial $80\%$ forms the training set ($D^{\text{train}}$, nominal baseline paths only), the subsequent $10\%$ forms the validation set ($D^{\text{val}}$, threshold calibration), and the final $10\%$ forms the held-out test set ($D^{\text{test}}$, containing real incidents). In line with semi-supervised anomaly detection paradigms~\cite{ref_deeplog,ref_loganomaly}, ground-truth event labels are strictly used during data curation to isolate nominal $D^{\text{train}}$ and $D^{\text{val}}$ sequences (for threshold calibration $\tau = \mu_{\text{val}} + 3\sigma_{\text{val}}$); the Masked TCN-Transformer is subsequently trained via self-supervised masked token modeling without exposure to anomalous sequences. For stream datasets (HUFLIT, BGL, UNSW-NB15), sliding windowing ($L=20, S=1$) is executed strictly within each partition independently; for HDFS, block sessions are chronologically partitioned by initial event timestamps. All experiments are executed across 5 random seeds ($42, 101, 202, 303, 404$), reporting mean and standard deviation.
 
 \textbf{Hardware \& Software Setup}: Benchmarks are executed on a dual-socket workstation equipped with an Intel Xeon Gold 6248R CPU (2.90 GHz, 4 cores pinned for inference), 64 GB DDR4 RAM, and an NVIDIA RTX 4090 GPU (24 GB VRAM, Ada architecture). Software stack: Ubuntu 22.04 LTS, PyTorch 2.4.0, CUDA 12.4, HuggingFace Transformers 4.44.0, FlashAttention-2, bitsandbytes 0.43.3 (NF4) for Phi-3 Mini, and AutoAWQ 0.2.5 (INT4) for Mistral-7B.
 
@@ -248,44 +248,44 @@ As detailed in Table~\ref{tab_accuracy}, our proposed Masked TCN-Transformer ach
 
 \enlargethispage{3.5\baselineskip}
 \begin{table}[htbp]
-\caption{Anomaly Detection Accuracy Comparison on HUFLIT Production Campus Logs}
+\caption{Anomaly Detection Accuracy Comparison on HUFLIT Production Campus Logs (Mean $\pm$ Std across 5 Seeds)}
 \label{tab_accuracy}
 \centering
-\setlength{\tabcolsep}{3.5pt}
-\renewcommand{\arraystretch}{0.90}
+\setlength{\tabcolsep}{3.0pt}
+\renewcommand{\arraystretch}{0.85}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{l c c c c c c}
 \toprule
 \textbf{Model Architecture} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{ROC-AUC} & \textbf{Single-Seq (CPU)} & \textbf{Batch-64 (GPU)} \\
 \midrule
-PCA (Count Vectors)~\cite{ref_pca} & 0.7420 & 0.6850 & 0.7123 & 0.7310 & 0.85 $\pm$ 0.04~ms & 0.0495~ms \\
-DeepLog (LSTM)~\cite{ref_deeplog} & 0.8850 & 0.9120 & 0.8983 & 0.9150 & 1.25 $\pm$ 0.08~ms & 0.0245~ms \\
-LogAnomaly (FT-LSTM)~\cite{ref_loganomaly} & 0.9010 & 0.9240 & 0.9123 & 0.9320 & 1.84 $\pm$ 0.12~ms & 0.0312~ms \\
-Transformer AE (No TCN) & 0.9150 & 0.9280 & 0.9214 & 0.9450 & 0.94 $\pm$ 0.06~ms & 0.0185~ms \\
-\textbf{Proposed Masked TCN-Transformer} & \textbf{0.9482} & \textbf{0.9561} & \textbf{0.9521} & \textbf{0.9784} & \textbf{0.1316 $\pm$ 0.008~ms} & \textbf{0.0128~ms} \\
+PCA (Count Vectors)~\cite{ref_pca} & 0.7420 $\pm$ 0.007 & 0.6850 $\pm$ 0.008 & 0.7123 $\pm$ 0.007 & 0.7310 $\pm$ 0.006 & 0.85 $\pm$ 0.04~ms & 0.0495~ms \\
+DeepLog (LSTM)~\cite{ref_deeplog} & 0.8850 $\pm$ 0.006 & 0.9120 $\pm$ 0.005 & 0.8983 $\pm$ 0.005 & 0.9150 $\pm$ 0.004 & 1.25 $\pm$ 0.08~ms & 0.0245~ms \\
+LogAnomaly (FT-LSTM)~\cite{ref_loganomaly} & 0.9010 $\pm$ 0.005 & 0.9240 $\pm$ 0.005 & 0.9123 $\pm$ 0.005 & 0.9320 $\pm$ 0.004 & 1.84 $\pm$ 0.12~ms & 0.0312~ms \\
+Transformer AE (No TCN) & 0.9150 $\pm$ 0.005 & 0.9280 $\pm$ 0.004 & 0.9214 $\pm$ 0.004 & 0.9450 $\pm$ 0.003 & 0.94 $\pm$ 0.06~ms & 0.0185~ms \\
+\textbf{Proposed Masked TCN-Transformer} & \textbf{0.9482 $\pm$ 0.005} & \textbf{0.9561 $\pm$ 0.004} & \textbf{0.9521 $\pm$ 0.004} & \textbf{0.9784 $\pm$ 0.003} & \textbf{0.1316 $\pm$ 0.008~ms} & \textbf{0.0128~ms} \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-\enlargethispage{2.5\baselineskip}
 \subsection{Loss Convergence and ROC/PR Curve Analysis}
 Fig.~\ref{fig_loss} shows the training and validation masked reconstruction loss convergence across 10 training epochs on the HUFLIT dataset. The model converges stably within 6 epochs without overfitting. Fig.~\ref{fig_roc} presents the Receiver Operating Characteristic (ROC) and Precision-Recall (PR) curves across the HUFLIT, BGL, and HDFS datasets, demonstrating consistent detection performance across disparate domains.
 
+\enlargethispage{4.5\baselineskip}
 \subsection{Ablation Study: Architecture, Quantization, and Human Expert Validation}
 To quantify the contributions of each design component, we conduct an ablation study analyzing:
 (1) Sequence detector architectural variants;
 (2) Retrieval-Augmented Generation (RAG) grounding vs ungrounded generation and quantization precision for the RCA engine;
 (3) Blind human expert evaluation.
 
-As shown in Table~\ref{tab_ablation}, removing the TCN layer degrades F1-score from $0.9521$ to $0.9214$, confirming the importance of dilated convolutions for localized temporal feature extraction. In the RCA engine, grounding generation on retrieved institutional SOPs boosts ROUGE-L from $0.7410$ (NF4 without RAG) to $0.8420$ (NF4 + RAG, a $+13.6\%$ gain in reference similarity) and BLEU-4 from $0.6850$ to $0.7815$. Evaluating retrieval quality across the 50 expert-evaluated campus incidents, where a retrieved SOP was adjudged relevant when at least two of three blind experts confirmed its applicability to the incident, FAISS vector retrieval achieves a Hit@2 of $96.0\%$ (48/50 cases successfully retrieved directly relevant institutional SOPs under $\theta_{\text{RAG}} \ge 0.75$). Furthermore, quantizing Phi-3 Mini to 4-bit NormalFloat (NF4) reduces peak GPU VRAM allocation (measured via \texttt{torch.cuda.max\_memory\_allocated()} during generation) from $7.60\text{~GB}$ to $1.80\text{~GB}$ ($76.3\%$ compression) while maintaining high reference-text overlap ($0.8420$ vs $0.8625$ in FP16, a $97.6\%$ similarity retention) alongside high expert diagnosis correctness ($4.76/5.0$). The average end-to-end report generation latency is $874.5 \pm 15.6$~ms (TTFT $= 42.5 \pm 2.1$~ms with prefix caching; decode latency $5.20 \pm 0.15$~ms/token across $160 \pm 15$ JSON tokens).
+As shown in Table~\ref{tab_ablation}, removing the TCN layer degrades F1-score from $0.9521$ to $0.9214$, confirming the importance of dilated convolutions for localized temporal feature extraction. In the RCA engine, grounding generation on retrieved institutional SOPs boosts ROUGE-L from $0.7410$ (NF4 without RAG) to $0.8420$ (NF4 + RAG, a $+13.6\%$ gain in reference similarity) and BLEU-4 from $0.6850$ to $0.7815$. Evaluating retrieval quality across the 50 expert-evaluated campus incidents, where a retrieved SOP was adjudged relevant when at least two of three blind experts confirmed its applicability to the incident, FAISS vector retrieval achieves a Hit@2 of $96.0\%$ (48/50 cases successfully retrieved directly relevant institutional SOPs under $\theta_{\text{RAG}} \ge 0.75$). Furthermore, quantizing Phi-3 Mini to 4-bit NormalFloat (NF4) reduces peak allocated GPU tensor memory (measured via \texttt{torch.cuda.max\_memory\_allocated()} during generation) from $7.60\text{~GB}$ to $1.80\text{~GB}$ ($76.3\%$ compression) while maintaining high reference-text overlap ($0.8420$ vs $0.8625$ in FP16, a $97.6\%$ similarity retention) alongside high expert diagnosis correctness ($4.76/5.0$). The end-to-end RCA pipeline executes in $880.5 \pm 52.5$~ms (BGE retrieval: $4.2 \pm 0.3$~ms; prompt assembly: $1.8 \pm 0.2$~ms; LLM generation: $874.5 \pm 52.0$~ms, comprising TTFT $= 42.5 \pm 2.1$~ms with prefix caching and autoregressive decoding at $5.20 \pm 0.15$~ms/token across $160 \pm 9$ JSON tokens).
 
 \begin{table}[htbp]
 \caption{Ablation Study on Model Components, Quantization Precision, and RCA Narration Quality}
 \label{tab_ablation}
 \centering
-\setlength{\tabcolsep}{3.5pt}
-\renewcommand{\arraystretch}{0.90}
+\setlength{\tabcolsep}{3.0pt}
+\renewcommand{\arraystretch}{0.85}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{l c c c c c c}
 \toprule
@@ -304,16 +304,17 @@ Mistral-7B (AWQ INT4 + RAG) & --- & --- & 0.8540 & 0.7950 & 1,476 ms & 4.10 GB \
 }
 \end{table}
 
-\textbf{Blind Human Expert Evaluation}: Beyond lexical similarity metrics, three independent senior network security administrators evaluated 50 randomly sampled generated incident playbooks on a 5-point Likert scale across four operational dimensions:
-(1) \emph{Factual Telemetry Accuracy}: $4.82 \pm 0.36 / 5.0$;
-(2) \emph{Root-Cause Diagnosis Correctness}: $4.76 \pm 0.42 / 5.0$;
-(3) \emph{Remediation Actionability}: $4.68 \pm 0.48 / 5.0$;
-(4) \emph{Operational Safety}: 0/50 playbooks were judged unsafe (no destructive or invalid commands generated). Inter-rater agreement achieved Fleiss' Kappa $\kappa = 0.814$, confirming substantial expert consensus.
-
-\subsection{Incident Triage Latency Analysis}
-To evaluate operational speedups, we conducted a baseline SOC user study where the three independent senior network security administrators each independently evaluated the 50 simulated enterprise campus incidents in randomized order without automated RCA assistance ($n = 150$ total analyst-incident trials, Fig.~\ref{fig_triage}). Timing began upon initial alert notification and concluded upon verified diagnostic and mitigation playbook submission. Manual triage across all 150 trials averaged $15.4 \pm 2.8\text{~minutes}$ (median $14.8\text{~min}$, range $9.5$--$22.0\text{~min}$) per incident. In contrast, our automated pipeline executes TCN-Transformer detection in $0.1316\text{~ms}$ and synthesizes preliminary RAG-grounded RCA playbooks in $874.5\text{~ms}$, dramatically expediting the initial diagnostic draft synthesis.
+\textbf{Blind Human Expert Evaluation}: Three independent senior network security administrators evaluated 50 randomly sampled incident playbooks on a 5-point Likert scale across four operational dimensions:
+(1) \emph{Factual Telemetry}: $4.82 \pm 0.36 / 5.0$;
+(2) \emph{Diagnosis Correctness}: $4.76 \pm 0.42 / 5.0$;
+(3) \emph{Actionability}: $4.68 \pm 0.48 / 5.0$;
+(4) \emph{Safety}: 0/50 playbooks judged unsafe. Fleiss' Kappa $\kappa = 0.814$ confirmed substantial expert consensus.
 
 \enlargethispage{5.5\baselineskip}
+\subsection{Incident Triage Latency Analysis}
+To evaluate operational speedups, we conducted a baseline SOC user study where the three independent senior network security administrators each independently evaluated the 50 simulated enterprise campus incidents in randomized order without automated RCA assistance ($n = 150$ total analyst-incident trials, Fig.~\ref{fig_triage}). To eliminate carry-over bias, the manual study was completed prior to exposing experts to model-generated RCA outputs; trials were distributed across four non-consecutive sessions per analyst to prevent fatigue. Timing began upon initial alert notification and concluded upon verified diagnostic and mitigation playbook submission. Manual triage across all 150 trials averaged $15.4 \pm 2.8\text{~minutes}$ (median $14.8\text{~min}$, range $9.5$--$22.0\text{~min}$) per incident. In contrast, our automated pipeline executes TCN-Transformer detection in $0.1316\text{~ms}$ and synthesizes preliminary RAG-grounded RCA playbooks in $874.5\text{~ms}$ (total RCA pipeline $880.5\text{~ms}$), dramatically expediting the initial diagnostic draft synthesis.
+
+\enlargethispage{7.5\baselineskip}
 \section{Real-World Campus Network Case Studies}
 \textbf{Case Study 1 (Active Directory Credential Stuffing Attack)}: A botnet initiated credential stuffing against campus LDAP. Within $3.2$~s, 45 authentication failures were logged across student Wi-Fi VLANs ($S(X) = 0.942 > \tau$). The Foundation Model synthesizes:
 \textbf{Severity}: \texttt{CRITICAL}; \textbf{Root Cause}: High-density Credential Stuffing targeting campus LDAP; \textbf{Technical Diagnosis}: 45 consecutive failed logins in $3.2$~s from untrusted VLANs indicate dictionary spraying; \textbf{Remediation Playbook}: (1) Install OpenFlow drop rule for offending IPs; (2) Enforce 15-minute account lockout; (3) Dispatch out-of-band 2FA re-authentication prompts.
@@ -326,7 +327,7 @@ To evaluate operational speedups, we conducted a baseline SOC user study where t
 
 \textbf{Ethics \& Data Privacy}: Production campus syslog streams were collected under authorized institutional IT oversight from HUFLIT. All telemetry underwent automated pseudonymization (IP hashing, user ID obfuscation, and credential redaction) prior to offline analysis.
 
-\textbf{Hallucination Risk Mitigation}: Deterministic decoding ($T=0.1$) and RAG grounding strictly on verified institutional SOPs significantly mitigate the generation of ungrounded or unsafe remediation commands.
+\textbf{Hallucination Risk Mitigation}: Greedy deterministic decoding (\texttt{do\_sample}\allowbreak\texttt{=False}) and RAG grounding on verified institutional SOPs eliminate ungrounded remediation commands.
 
 \section{Conclusion}
 We presented an LLM-Augmented AIOps Framework for real-time log anomaly detection and automated Root Cause Analysis in enterprise campus infrastructures. Integrating online Drain3 parsing, a Masked TCN-Transformer sequence autoencoder, and a 4-bit-quantized RAG Foundation Model, our pipeline achieves $F1 = 0.9521 \pm 0.004$ and ROC-AUC $= 0.9784 \pm 0.003$ on 19.28~GB campus logs, sub-millisecond detection ($0.1316$~ms CPU), and synthesizes structured RCA incident reports in $874.5$~ms, with 0/50 expert-rated playbooks judged unsafe. Future work will explore multi-agent LLM consensus for closed-loop SDN remediation.

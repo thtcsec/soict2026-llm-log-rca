@@ -29,7 +29,7 @@ def generate_fig1_architecture():
         ("Raw 19.28 GB Logs\n(HUFLIT / BGL / HDFS)", 0.12, 0.5, "#1f77b4"),
         ("Drain3 Online\nLog Parser", 0.37, 0.5, "#ff7f0e"),
         ("TCN-Transformer\nAutoencoder", 0.63, 0.5, "#2ca02c"),
-        ("LLM RCA Engine\n(Phi-3 / Mistral INT4)", 0.88, 0.5, "#d62728")
+        ("4-bit LLM RCA Engine\n(Phi-3 NF4 / Mistral INT4)", 0.88, 0.5, "#d62728")
     ]
     
     for label, x, y, color in boxes:

@@ -37,7 +37,7 @@ Ho Chi Minh City, Vietnam\\
 \thispagestyle{empty}
 
 \begin{abstract}
-Modern enterprise and educational campus infrastructures generate massive volumes of heterogeneous, unstructured log streams across multi-site networks. While deep sequence models achieve high statistical accuracy in anomaly detection, traditional Artificial Intelligence for IT Operations (AIOps) platforms suffer from a critical explainability bottleneck: scalar reconstruction error scores fail to communicate actionable root causes, forcing Security Operations Center (SOC) analysts to manually triage thousands of log messages under severe time constraints. In this paper, we propose an end-to-end \textbf{LLM-Augmented AIOps Framework} synthesizing streaming Drain3 log template parsing, a Masked Temporal Convolutional Network and Transformer (TCN-Transformer) Autoencoder, and a lightweight quantized Foundation Model (Phi-3 / Mistral via INT4 quantization and RAG-guided prompting) for real-time automated Root Cause Analysis (RCA) narration. Evaluated on a production 19.28~GB enterprise campus log dataset (14,850,220 log lines) from HUFLIT alongside standard benchmarks (BGL, HDFS, and UNSW-NB15) under strict chronological partitioning across 5 random seeds, our hybrid masked detector achieves an anomaly detection F1-score of $0.9521 \pm 0.004$ and ROC-AUC of $0.9784 \pm 0.003$ on campus logs, outperforming DeepLog and LogAnomaly baselines while executing single-sequence inference in $0.1316$~ms ($0.0128$~ms vectorized GPU batch-64). Furthermore, the RAG-grounded foundation model synthesizes structured incident playbooks in $125.18$~ms (compared to $15.4$~minutes human triage) with high semantic fidelity (ROUGE-L $0.8420$, BLEU-4 $0.7815$) and blind expert correctness of $4.76/5.0$ with 0/50 unsafe recommendations observed.
+Modern enterprise and educational campus infrastructures generate massive volumes of heterogeneous, unstructured log streams across multi-site networks. While deep sequence models achieve high statistical accuracy in anomaly detection, traditional Artificial Intelligence for IT Operations (AIOps) platforms suffer from a critical explainability bottleneck: scalar reconstruction error scores fail to communicate actionable root causes, forcing Security Operations Center (SOC) analysts to manually triage thousands of log messages under severe time constraints. In this paper, we propose an end-to-end \textbf{LLM-Augmented AIOps Framework} synthesizing streaming Drain3 log template parsing, a Masked Temporal Convolutional Network and Transformer (TCN-Transformer) Autoencoder, and a lightweight quantized Foundation Model (Phi-3 / Mistral via INT4 quantization and RAG-guided prompting) for real-time automated Root Cause Analysis (RCA) narration. Evaluated on a production 19.28~GB enterprise campus log dataset (14,850,220 log lines) from HUFLIT alongside standard benchmarks (BGL, HDFS, and UNSW-NB15) under strict chronological partitioning across 5 random seeds, our hybrid masked detector achieves an anomaly detection F1-score of $0.9521 \pm 0.004$ and ROC-AUC of $0.9784 \pm 0.003$ on campus logs, outperforming selected representative baselines (DeepLog, LogAnomaly, and Transformer AE) while executing single-sequence inference in $0.1316$~ms ($0.0128$~ms vectorized GPU batch-64). Furthermore, the RAG-grounded foundation model synthesizes structured incident playbooks in $125.18$~ms (compared to $15.4$~minutes human triage) with high semantic fidelity (ROUGE-L $0.8420$, BLEU-4 $0.7815$) and blind expert correctness of $4.76/5.0$ with 0/50 unsafe recommendations observed.
 
 \keywords{AIOps \and Log Anomaly Detection \and Large Language Models \and Root Cause Analysis \and TCN-Transformer Autoencoder \and Drain3 \and Enterprise Campus Infrastructure.}
 \end{abstract}
@@ -45,7 +45,7 @@ Modern enterprise and educational campus infrastructures generate massive volume
 \section{Introduction}
 Enterprise networks and higher education IT infrastructures generate high-density syslog telemetry continuously streaming from perimeter firewalls, Active Directory domain controllers, Learning Management Systems (LMS), student authentication portals, and core routing backbones~\cite{ref_drain3,ref_deeplog}. Rapid and accurate anomaly detection within these log streams is paramount for thwarting lateral cyber attacks, credential brute-forcing, data exfiltration, and service disruptions~\cite{ref_loganomaly}.
 
-Recent advancements in deep learning have introduced sequence-based log anomaly detection models, notably DeepLog (LSTM-based next-token prediction)~\cite{ref_deeplog}, LogAnomaly (semantic template vectors)~\cite{ref_loganomaly}, and Transformer-based autoencoders~\cite{ref_swisslog,ref_logrobust}. While these architectures achieve strong empirical detection fidelity on synthetic or curated benchmarks, existing AIOps paradigms exhibit two fundamental operational bottlenecks in production environments:
+Recent advancements in deep learning have introduced sequence-based log anomaly detection models, notably DeepLog (LSTM-based next-token prediction)~\cite{ref_deeplog}, LogAnomaly (semantic template vectors)~\cite{ref_loganomaly}, LogRobust~\cite{ref_logrobust}, and SwissLog~\cite{ref_swisslog}. While these architectures achieve strong empirical detection fidelity on synthetic or curated benchmarks, existing AIOps paradigms exhibit two fundamental operational bottlenecks in production environments:
 
 \begin{enumerate}
     \item \textbf{Explainability Deficit}: Contemporary anomaly detectors produce scalar anomaly scores or probabilistic reconstruction errors (e.g., $RE = 0.942$). These numerical scores provide zero contextual explanation regarding \emph{why} a sequence is anomalous, \emph{what} specific attack vector or hardware malfunction is occurring, or \emph{which} downstream services are impacted.
@@ -61,7 +61,7 @@ The core research contributions of this paper are summarized as follows:
     \item \textbf{End-to-End AIOps Architecture}: We construct a unified 3-stage pipeline integrating online Drain3 template extraction, a masked TCN-Transformer autoencoder for microsecond-level sequence anomaly scoring, and an LLM-driven narration engine.
     \item \textbf{Masked TCN-Transformer Sequence Autoencoder}: We formulate a masked sequence modeling objective (15\% dynamic token masking) that prevents trivial identity copying, combining 1D dilated causal convolutions (capturing local short-term temporal dependencies) with Multi-Head Self-Attention (capturing long-range contextual correlations across log templates), achieving superior detection accuracy with sub-millisecond single-sequence inference ($0.1316$~ms CPU / $0.0128$~ms GPU).
     \item \textbf{RAG-Grounded Foundation Model RCA Narration}: We formulate a Retrieval-Augmented Generation (RAG) prompting architecture using a local FAISS index of institutional Standard Operating Procedures (SOPs) and INT4-quantized open-source foundation models (Microsoft Phi-3 Mini / Mistral-7B) to synthesize structured, human-readable RCA narratives and step-by-step mitigation playbooks.
-    \item \textbf{Empirical Validation on 19.28~GB Real-World Production Logs}: We validate our framework on a comprehensive 19.28~GB enterprise campus log dataset (14,850,220 log lines) collected from the HUFLIT production infrastructure, alongside standard public benchmarks (BGL, HDFS, and UNSW-NB15), demonstrating an anomaly detection F1-score of $0.9521 \pm 0.004$, ROC-AUC of $0.9784 \pm 0.003$, and rigorous blind expert validation ($4.76/5.0$ correctness score with zero unsafe commands).
+    \item \textbf{Empirical Validation on 19.28~GB Real-World Production Logs}: We validate our framework on a comprehensive 19.28~GB enterprise campus log dataset (14,850,220 log lines) collected from the HUFLIT production infrastructure, alongside standard public benchmarks (BGL, HDFS, and UNSW-NB15), demonstrating an anomaly detection F1-score of $0.9521 \pm 0.004$, ROC-AUC of $0.9784 \pm 0.003$, outperforming representative baselines under our evaluation protocol with rigorous blind expert validation ($4.76/5.0$ correctness score with 0/50 unsafe commands observed).
 \end{itemize}
 
 \begin{figure*}[t]
@@ -76,10 +76,10 @@ The core research contributions of this paper are summarized as follows:
 Raw log messages are unstructured strings containing static message templates interleaved with dynamic runtime variables (e.g., IP addresses, user IDs, timestamps). Log parsing converts raw log lines into discrete template identifiers. Early approaches utilized regular expressions or invariant mining~\cite{ref_drain3,ref_spell}. He et al.~\cite{ref_drain3} proposed Drain, an online parser using a fixed-depth parse tree that achieves high parsing accuracy and throughput. Drain3 extends Drain with persistent caching and streaming support. In this work, we employ Drain3 to sanitize high-throughput syslog streams in real time.
 
 \subsection{Deep Learning for Log Anomaly Detection}
-DeepLog~\cite{ref_deeplog} pioneered the application of deep sequence modeling to log analytics by training a Long Short-Term Memory (LSTM) network to predict the next log template in nominal execution paths. LogAnomaly~\cite{ref_loganomaly} introduced template2vec embeddings to model sequential and quantitative log patterns simultaneously. LogRobust~\cite{ref_logrobust} applied Bi-LSTMs with attention to handle unstable and unseen log templates. SwissLog~\cite{ref_swisslog} leveraged bidirectional LSTMs with multi-source attention. Recently, Transformer architectures~\cite{ref_attention,ref_logkey} have been adopted to log intelligence, leveraging self-attention mechanisms. However, existing detectors focus exclusively on binary classification and numerical error computation, lacking semantic root cause explanation.
+DeepLog~\cite{ref_deeplog} pioneered deep sequence modeling for log analytics via LSTM next-token prediction. LogAnomaly~\cite{ref_loganomaly} introduced template2vec embeddings to capture sequential and quantitative patterns. LogRobust~\cite{ref_logrobust} and SwissLog~\cite{ref_swisslog} applied attentive LSTMs to handle unstable and interleaved log sequences. Recently, Transformer architectures (e.g., LogMUSE~\cite{ref_logmuse_2026} and attentive sequence models~\cite{ref_attention}) have been adopted to model multi-scale temporal dependencies. However, these detectors focus exclusively on binary classification and numerical error computation, lacking semantic root cause explanation.
 
 \subsection{Foundation Models \& LLMs in AIOps}
-Large Language Models (LLMs) have demonstrated exceptional reasoning and summarization capabilities across software engineering and system telemetry~\cite{ref_phi3,ref_lora,ref_qlora}. Recent exploratory studies have investigated LLMs for cloud incident management and root cause analysis~\cite{ref_llm_rca,ref_rca_survey,ref_llm4log_survey,ref_krone_2026}. In particular, the KRONE framework (ICDE 2026)~\cite{ref_krone_2026} introduced hierarchical log anomaly detection coupled with selective foundation model explanation. While KRONE utilizes LLMs primarily for post-hoc anomaly reasoning via cloud-scale models, our work targets resource-constrained enterprise campus gateways: we decouple microsecond-level edge sequence scoring (via a deterministic Masked TCN-Transformer) from an on-premise, INT4-quantized RAG engine explicitly generating structured, actionable operator playbooks. Table~\ref{tab_related_work} compares our framework against representative state-of-the-art systems across parsing, detection, and explainability dimensions.
+Large Language Models (LLMs) have demonstrated exceptional reasoning capabilities across software engineering and system telemetry~\cite{ref_phi3,ref_lora,ref_qlora}. Recent exploratory studies have investigated LLMs for cloud incident management and root cause analysis~\cite{ref_llm_rca,ref_rca_survey,ref_llm4log_survey,ref_krone_2026,ref_maidlog_2026}. In particular, KRONE (ICDE 2026)~\cite{ref_krone_2026} constructs an Entity-Action-Status hierarchy via LLMs to drive an automaton-based local detector with nested LLM invocation for ambiguous cases. MaidLog (ICDE 2026)~\cite{ref_maidlog_2026} uses LLMs offline for zero-shot pseudo-labeling during training to supervise a lightweight inference detector. In contrast, our framework targets resource-constrained campus edge gateways: we decouple microsecond-level edge sequence scoring (via a self-supervised Masked TCN-Transformer) from an on-premise, INT4-quantized RAG engine explicitly generating structured, actionable operator playbooks upon anomaly detection. Table~\ref{tab_related_work} compares our framework against representative state-of-the-art systems.
 
 \begin{table}[htbp]
 \caption{Taxonomy and Comparison with Existing Log Anomaly Detection Frameworks}
@@ -94,7 +94,7 @@ PCA / Invariants~\cite{ref_drain3} & Fixed Regex & Linear Projection & No & None
 DeepLog~\cite{ref_deeplog} & Spell / Drain & Stacked LSTM & No & Anomaly Score & $1.25\text{~ms (CPU)}$ & $0.0245\text{~ms (GPU)}$ \\
 LogAnomaly~\cite{ref_loganomaly} & FT-Tree & FT-LSTM + Template2Vec & Partial & Anomaly Score & $1.84\text{~ms (CPU)}$ & $0.0312\text{~ms (GPU)}$ \\
 SwissLog~\cite{ref_swisslog} & Drain3 & Attentive Bi-LSTM & No & Attention Weights & $1.42\text{~ms (CPU)}$ & $0.0184\text{~ms (GPU)}$ \\
-KRONE (ICDE'26)~\cite{ref_krone_2026} & Semantic Parser & Hierarchical GNN-Trans. & Partial & Selective LLM Summary & $>15\text{~ms}$ & $>2.5\text{~ms}$ \\
+KRONE (ICDE'26)~\cite{ref_krone_2026} & LLM Hierarchy & Automaton + Nested LLM & Partial & Hierarchical Summary & NR & NR \\
 \textbf{Ours (LLM-Augmented)} & \textbf{Drain3 Stream} & \textbf{Masked TCN-Transformer} & \textbf{Yes (RAG-LLM)} & \textbf{JSON Incident Playbook} & \textbf{$0.1316\text{~ms (CPU)}$} & \textbf{$0.0128\text{~ms (GPU)}$} \\
 \bottomrule
 \end{tabular}%
@@ -185,7 +185,7 @@ The prompt $\mathcal{P}$ integrates three telemetry dimensions:
 (2) Infrastructure Metadata: Originating network segment, device hostname, and service criticality;
 (3) Retrieved RAG Context: Top-$k$ institutional SOP runbooks ($C_1, C_2$).
 
-To permit deployment on edge gateway servers, we deploy Microsoft Phi-3 Mini (3.8B parameters)~\cite{ref_phi3} and Mistral-7B~\cite{ref_mistral} quantized to 4-bit NormalFloat (INT4 / NF4) via AWQ / bitsandbytes~\cite{ref_qlora}, reducing active GPU/CPU RAM consumption from $7.60$~GB to $1.80$~GB. At low temperature ($T=0.1$), the LLM generates a structured JSON report:
+To permit deployment on edge gateway servers, we evaluate Microsoft Phi-3 Mini (3.8B parameters)~\cite{ref_phi3} quantized to 4-bit NormalFloat (NF4 via `bitsandbytes` with `bfloat16` compute dtype) and Mistral-7B~\cite{ref_mistral} quantized to INT4 via AutoAWQ (group size 128)~\cite{ref_qlora}, reducing active GPU/CPU RAM consumption from $7.60$~GB to $1.80$~GB for Phi-3 Mini. At low temperature ($T=0.1$), the LLM generates a structured JSON report:
 \begin{quote}
 \scriptsize
 \texttt{\{ \\
@@ -208,7 +208,7 @@ We conduct comprehensive empirical evaluations across four datasets:
 
 \textbf{Strict Chronological Partitioning}: To strictly prevent overlapping-window data leakage across training and testing splits, each dataset is chronologically ordered and partitioned before sequence extraction: the initial $80\%$ forms the training set ($D^{\text{train}}$, nominal baseline paths only), the subsequent $10\%$ forms the validation set ($D^{\text{val}}$, threshold calibration), and the final $10\%$ forms the held-out test set ($D^{\text{test}}$, containing real incidents). Sliding window segmentation ($L=20, S=1$) is executed strictly within each partition independently. All experiments are executed across 5 random seeds ($42, 101, 202, 303, 404$), reporting mean and standard deviation.
 
-\textbf{Hardware Setup}: Benchmarks are executed on a dual-socket workstation equipped with an Intel Xeon Gold 6248R CPU (2.90 GHz, 4 cores pinned for inference), 64 GB DDR4 RAM, and an NVIDIA RTX 4090 GPU (24 GB VRAM).
+\textbf{Hardware \& Software Setup}: Benchmarks are executed on a dual-socket workstation equipped with an Intel Xeon Gold 6248R CPU (2.90 GHz, 4 cores pinned for inference), 64 GB DDR4 RAM, and an NVIDIA RTX 4090 GPU (24 GB VRAM, Ada architecture). Software stack: Ubuntu 22.04 LTS, PyTorch 2.4.0, CUDA 12.4, HuggingFace Transformers 4.44.0, FlashAttention-2, bitsandbytes 0.43.3 (NF4) for Phi-3 Mini, and AutoAWQ 0.2.5 (INT4) for Mistral-7B.
 
 \begin{table}[htbp]
 \caption{Multi-Dataset Benchmark Characteristics and Empirical Performance (Mean $\pm$ Std across 5 Seeds)}
@@ -237,28 +237,6 @@ We benchmark our hybrid Masked TCN-Transformer model against four representative
 
 As detailed in Table~\ref{tab_accuracy}, our proposed Masked TCN-Transformer achieves the highest F1-score ($0.9521 \pm 0.004$) and ROC-AUC ($0.9784 \pm 0.003$), outperforming DeepLog ($F1 = 0.8983$) and LogAnomaly ($F1 = 0.9123$). Single-sequence unbatched latency on CPU is $0.1316 \pm 0.008$~ms (with vectorized GPU batch-64 latency of $0.0128$~ms per sequence), demonstrating suitability for real-time edge syslog inspection.
 
-\begin{table}[htbp]
-\caption{Anomaly Detection Accuracy Comparison on HUFLIT Production Campus Logs}
-\label{tab_accuracy}
-\centering
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{l c c c c c c}
-\toprule
-\textbf{Model Architecture} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{ROC-AUC} & \textbf{Single-Seq (CPU)} & \textbf{Batch-64 (GPU)} \\
-\midrule
-PCA / Invariant Mining~\cite{ref_drain3} & 0.7420 & 0.6850 & 0.7123 & 0.7310 & 0.85 $\pm$ 0.04~ms & 0.0495~ms \\
-DeepLog (LSTM)~\cite{ref_deeplog} & 0.8850 & 0.9120 & 0.8983 & 0.9150 & 1.25 $\pm$ 0.08~ms & 0.0245~ms \\
-LogAnomaly (FT-LSTM)~\cite{ref_loganomaly} & 0.9010 & 0.9240 & 0.9123 & 0.9320 & 1.84 $\pm$ 0.12~ms & 0.0312~ms \\
-Transformer AE (No TCN) & 0.9150 & 0.9280 & 0.9214 & 0.9450 & 0.94 $\pm$ 0.06~ms & 0.0185~ms \\
-\textbf{Proposed Masked TCN-Transformer} & \textbf{0.9482} & \textbf{0.9561} & \textbf{0.9521} & \textbf{0.9784} & \textbf{0.1316 $\pm$ 0.008~ms} & \textbf{0.0128~ms} \\
-\bottomrule
-\end{tabular}%
-}
-\end{table}
-
-\subsection{Loss Convergence and ROC/PR Curve Analysis}
-Fig.~\ref{fig_loss} shows the training and validation masked reconstruction loss convergence across 10 training epochs on the HUFLIT dataset. The model converges stably within 6 epochs without overfitting. Fig.~\ref{fig_roc} presents the Receiver Operating Characteristic (ROC) and Precision-Recall (PR) curves across the HUFLIT, BGL, and HDFS datasets, validating robust generalization across disparate computing domains.
-
 \begin{figure*}[t]
 \centering
 \begin{minipage}{0.32\textwidth}
@@ -281,13 +259,35 @@ Fig.~\ref{fig_loss} shows the training and validation masked reconstruction loss
 \end{minipage}
 \end{figure*}
 
+\begin{table}[htbp]
+\caption{Anomaly Detection Accuracy Comparison on HUFLIT Production Campus Logs}
+\label{tab_accuracy}
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c c c c c c}
+\toprule
+\textbf{Model Architecture} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{ROC-AUC} & \textbf{Single-Seq (CPU)} & \textbf{Batch-64 (GPU)} \\
+\midrule
+PCA / Invariant Mining~\cite{ref_drain3} & 0.7420 & 0.6850 & 0.7123 & 0.7310 & 0.85 $\pm$ 0.04~ms & 0.0495~ms \\
+DeepLog (LSTM)~\cite{ref_deeplog} & 0.8850 & 0.9120 & 0.8983 & 0.9150 & 1.25 $\pm$ 0.08~ms & 0.0245~ms \\
+LogAnomaly (FT-LSTM)~\cite{ref_loganomaly} & 0.9010 & 0.9240 & 0.9123 & 0.9320 & 1.84 $\pm$ 0.12~ms & 0.0312~ms \\
+Transformer AE (No TCN) & 0.9150 & 0.9280 & 0.9214 & 0.9450 & 0.94 $\pm$ 0.06~ms & 0.0185~ms \\
+\textbf{Proposed Masked TCN-Transformer} & \textbf{0.9482} & \textbf{0.9561} & \textbf{0.9521} & \textbf{0.9784} & \textbf{0.1316 $\pm$ 0.008~ms} & \textbf{0.0128~ms} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\subsection{Loss Convergence and ROC/PR Curve Analysis}
+Fig.~\ref{fig_loss} shows the training and validation masked reconstruction loss convergence across 10 training epochs on the HUFLIT dataset. The model converges stably within 6 epochs without overfitting. Fig.~\ref{fig_roc} presents the Receiver Operating Characteristic (ROC) and Precision-Recall (PR) curves across the HUFLIT, BGL, and HDFS datasets, validating robust generalization across disparate computing domains.
+
 \subsection{Ablation Study: Architecture, Quantization, and Human Expert Validation}
 To quantify the contributions of each design component, we conduct an ablation study analyzing:
 (1) Sequence detector architectural variants;
 (2) Quantization precision and Foundation Model selection for the RCA engine;
 (3) Blind human expert evaluation.
 
-As shown in Table~\ref{tab_ablation}, removing the TCN layer degrades F1-score from $0.9521$ to $0.9214$, confirming the importance of dilated convolutions for localized temporal feature extraction. Quantizing the Phi-3 Mini foundation model to INT4 reduces active memory footprint from $7.60\text{~GB}$ to $1.80\text{~GB}$ ($76.3\%$ compression) while preserving $97.6\%$ of the RCA narration semantic fidelity (ROUGE-L of $0.8420$ vs $0.8625$ in FP16). The average LLM generation latency is $125.18 \pm 4.2$~ms (Time-To-First-Token TTFT $= 42.5 \pm 2.1$~ms, followed by autoregressive decoding of $160 \pm 15$ structured JSON tokens with an Inter-Token Latency ITL of $0.52 \pm 0.03$~ms/token, achieving an effective decoding throughput of $\approx 1,923$~tokens/second on the RTX 4090 GPU).
+As shown in Table~\ref{tab_ablation}, removing the TCN layer degrades F1-score from $0.9521$ to $0.9214$, confirming the importance of dilated convolutions for localized temporal feature extraction. Quantizing Phi-3 Mini to 4-bit NormalFloat (NF4) reduces active memory footprint from $7.60\text{~GB}$ to $1.80\text{~GB}$ ($76.3\%$ compression) while preserving $97.6\%$ of the RCA narration semantic fidelity (ROUGE-L of $0.8420$ vs $0.8625$ in FP16). The average end-to-end report generation latency is $125.18 \pm 4.2$~ms (Time-To-First-Token TTFT $= 42.5 \pm 2.1$~ms with static SOP prompt prefix caching, followed by autoregressive decoding of $160 \pm 15$ JSON tokens at an inter-token decode latency of $0.52 \pm 0.03$~ms/token).
 
 \begin{table}[htbp]
 \caption{Ablation Study on Model Components, Quantization Precision, and RCA Narration Quality}
@@ -303,8 +303,8 @@ Transformer Only (No TCN) & 0.9214 & 0.9450 & --- & --- & --- & 1.45 MB \\
 \textbf{Full Masked TCN-Transformer} & \textbf{0.9521} & \textbf{0.9784} & --- & --- & --- & \textbf{1.68 MB} \\
 \midrule
 Phi-3 Mini (FP16 Baseline) & --- & --- & 0.8625 & 0.8010 & 285.40 ms & 7.60 GB \\
-Mistral-7B (INT4 Quantized) & --- & --- & 0.8540 & 0.7950 & 198.50 ms & 4.10 GB \\
-\textbf{Phi-3 Mini (INT4 Quantized + RAG)} & --- & --- & \textbf{0.8420} & \textbf{0.7815} & \textbf{125.18 ms} & \textbf{1.80 GB} \\
+Mistral-7B (AWQ INT4) & --- & --- & 0.8540 & 0.7950 & 198.50 ms & 4.10 GB \\
+\textbf{Phi-3 Mini (NF4 Quantized + RAG)} & --- & --- & \textbf{0.8420} & \textbf{0.7815} & \textbf{125.18 ms} & \textbf{1.80 GB} \\
 \bottomrule
 \end{tabular}%
 }
@@ -361,11 +361,10 @@ The authors thank the Faculty of Information Technology, Ho Chi Minh City Univer
 \bibitem{ref_rca_survey} Soldani, J., Brogi, A.: Anomaly Detection and Failure Root Cause Analysis in (Micro)Service-Based Cloud Applications: A Survey. ACM Comput. Surv. 55(3), 1--39 (2022).
 \bibitem{ref_unsw} Moustafa, N., Slay, J.: UNSW-NB15: A Comprehensive Data Set for Network Intrusion Detection Systems. In: Proc. IEEE Mil. Commun. Inf. Syst. Conf. (MilCIS), pp. 1--6 (2015).
 \bibitem{ref_spell} Du, M., Li, F.: Spell: Streaming Parsing of System Event Logs. In: Proc. IEEE Int. Conf. Data Min. (ICDM), pp. 859--864 (2016).
-\bibitem{ref_logkey} Nedelkoski, S., Bogatinovski, J., Mandapati, A.K., et al.: Multi-Source Distributed System Log Anomaly Detection with Functional Transformers. In: Proc. ACM SIGKDD Conf. Knowl. Discov. Data Min. (KDD), pp. 2487--2495 (2020).
-\bibitem{ref_llm4log_survey} Ma, Z., Yang, J., Chen, T.H.: LLM4Log: A Systematic Review of Large Language Model-based Log Analysis. arXiv preprint arXiv:2502.12457 (2026).
-\bibitem{ref_krone_2026} Ma, L., Chen, J., Wang, Z., et al.: KRONE: Detecting, Localizing, and Explaining System Log Anomalies with Grounded Foundation Models. In: Proc. 42nd IEEE Int. Conf. Data Eng. (ICDE), pp. 1--14 (2026).
-\bibitem{ref_zero_trust} Rose, S., Borchert, O., Mitchell, S., Connelly, S.: Zero Trust Architecture. NIST Special Publication 800-207 (2020).
-\bibitem{ref_aiops_survey} Notaro, P., et al.: A Survey on Artificial Intelligence for IT Operations (AIOps). IEEE Commun. Surv. Tutorials 26(1), 542--578 (2024).
+\bibitem{ref_llm4log_survey} Ma, Z., Yang, J., Chen, T.H.: LLM4Log: A Systematic Review of Large Language Model-based Log Analysis. arXiv preprint arXiv:2604.16359 (2026).
+\bibitem{ref_krone_2026} Ma, L., Liu, J., Zhang, T., VanNostrand, P.M., Hofmann, D.M., Cao, L., Rundensteiner, E.A., Chen, J.: KRONE: Scalable LLM-Augmented Log Anomaly Detection via Hierarchical Abstraction. In: Proc. 42nd IEEE Int. Conf. Data Eng. (ICDE), pp. 1--14 (2026).
+\bibitem{ref_maidlog_2026} Zhang, Y., et al.: MaidLog: Efficient Zero-Shot and Label-Free Log Anomaly Detection for Resource-Constrained Systems. In: Proc. 42nd IEEE Int. Conf. Data Eng. (ICDE), pp. 1--13 (2026).
+\bibitem{ref_logmuse_2026} Wang, H., et al.: LogMUSE: Multi-Scale Transformer for Log-Based Anomaly Detection in Large-Scale Systems. IEEE Trans. Serv. Comput. 19(2), 112--126 (2026).
 \end{thebibliography}
 
 \end{document}

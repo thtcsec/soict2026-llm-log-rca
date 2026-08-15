@@ -23,24 +23,23 @@ plt.rcParams.update({
 
 def generate_fig1_architecture():
     # Wider aspect ratio for clear layout across full page width
-    fig, ax = plt.subplots(figsize=(7.5, 2.2))
+    fig, ax = plt.subplots(figsize=(9.2, 1.6))
     
     boxes = [
-        ("Raw 19.28 GB Logs\n(HUFLIT / BGL / HDFS)", 0.12, 0.5, "#1f77b4"),
+        ("Raw Syslog Streams\n(HUFLIT / BGL / HDFS)", 0.12, 0.5, "#1f77b4"),
         ("Drain3 Online\nLog Parser", 0.37, 0.5, "#ff7f0e"),
-        ("TCN-Transformer\nAutoencoder", 0.63, 0.5, "#2ca02c"),
+        ("Masked TCN-Transformer\nAutoencoder (0.13 ms)", 0.63, 0.5, "#2ca02c"),
         ("4-bit LLM RCA Engine\n(Phi-3 NF4 / Mistral INT4)", 0.88, 0.5, "#d62728")
     ]
     
     for label, x, y, color in boxes:
         ax.text(x, y, label, ha="center", va="center",
-                bbox=dict(boxstyle="round,pad=0.6", facecolor=color, alpha=0.90, edgecolor="black", lw=1.2),
-                color="white", fontweight="bold", fontsize=8.5)
+                bbox=dict(boxstyle="round,pad=0.55", facecolor=color, alpha=0.92, edgecolor="#2c3e50", lw=1.2),
+                color="white", fontweight="bold", fontsize=7.8)
         
-    arrows = [(0.23, 0.28), (0.47, 0.53), (0.73, 0.77)]
-    for start, end in arrows:
-        ax.annotate("", xy=(end, 0.5), xytext=(start, 0.5),
-                    arrowprops=dict(arrowstyle="->,head_width=0.3,head_length=0.5", lw=2.0, color="#333333"))
+    for (_, x1, y1, _), (_, x2, y2, _) in zip(boxes[:-1], boxes[1:]):
+        ax.annotate("", xy=(x2, y2), xytext=(x1, y1),
+                    arrowprops=dict(arrowstyle="->,head_width=0.35,head_length=0.55", lw=1.8, color="#2c3e50", shrinkA=56, shrinkB=56))
         
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)

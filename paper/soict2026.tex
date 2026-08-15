@@ -82,7 +82,7 @@ Sequence-based anomaly detection models learn temporal transition dynamics over 
 Recent 2025--2026 surveys, notably LLM4Log~\cite{ref_llm4log_survey}, categorize emerging LLM paradigms in log analytics, identifying key patterns including parser-free pretraining, retrieval-augmented grounding, and modular verifiers. Ma et al.~\cite{ref_krone_2026} proposed KRONE (ICDE 2026), a hierarchical framework utilizing nested LLM modules for log anomaly detection. MaidLog~\cite{ref_maidlog_2026} (ICDE 2026) investigates zero-shot detection on resource-constrained systems, while LogMUSE~\cite{ref_logmuse_2026} and ContraLog~\cite{ref_contralog_2026} examine multi-scale semantic embeddings and contrastive representations. In industry settings, Smart Eye~\cite{ref_smarteye_2026} (WWW 2026) implements a proposer-verifier framework. Cloud incident root-cause recommendation using LLMs has also been explored by Ahmed et al.~\cite{ref_llm_rca} and surveyed in~\cite{ref_rca_survey}. In contrast to high-latency external LLM APIs, our framework couples microsecond TCN-Transformer anomaly filtering with edge-quantized local LLMs and RAG grounding.
 
 \begin{table}[htbp]
-\caption{Systematic Comparison with State-of-the-Art Log Anomaly Detection Approaches ($^\dagger$Measured on our testbed under streaming evaluation; NR denotes Not Reported on this benchmark)}
+\caption{Systematic Comparison with State-of-the-Art Log Anomaly Detection Approaches (Parser column reflects original published systems; $^\dagger$Latency values measured on our testbed under controlled Drain3-based streaming evaluation; NR denotes Not Reported on this benchmark)}
 \label{tab_related_comparison}
 \centering
 \setlength{\tabcolsep}{4.0pt}
@@ -269,12 +269,12 @@ Transformer AE (No TCN) & 0.9150 $\pm$ 0.005 & 0.9280 $\pm$ 0.004 & 0.9214 $\pm$
 \subsection{Loss Convergence and ROC/PR Curve Analysis}
 Fig.~\ref{fig_loss} shows the training and validation masked reconstruction loss convergence across 10 training epochs on the HUFLIT dataset. The model converges stably within 6 epochs without overfitting. Fig.~\ref{fig_roc} presents the Receiver Operating Characteristic (ROC) and Precision-Recall (PR) curves across the HUFLIT, BGL, and HDFS datasets, demonstrating consistent detection performance across disparate domains.
 
-\enlargethispage{4.5\baselineskip}
+\enlargethispage{6.0\baselineskip}
 \subsection{Ablation Study: Architecture, Quantization, and Human Expert Validation}
 To quantify the contributions of each design component, we conduct an ablation study analyzing:
 (1) Sequence detector architectural variants;
 (2) Retrieval-Augmented Generation (RAG) grounding vs ungrounded generation and quantization precision for the RCA engine;
-(3) Blind human expert evaluation.
+(3) Variant-blind human expert evaluation. Reference RCA narratives and mitigation playbooks were independently constructed from validated historical post-incident records and verified by senior network administrators prior to automated model evaluation.
 
 As shown in Table~\ref{tab_ablation}, removing the TCN layer degrades F1-score from $0.9521$ to $0.9214$, confirming the importance of dilated convolutions for localized temporal feature extraction. In the RCA engine, grounding generation on retrieved institutional SOPs boosts ROUGE-L from $0.7410$ (NF4 without RAG) to $0.8420$ (NF4 + RAG, a $+13.6\%$ gain in reference similarity) and BLEU-4 from $0.6850$ to $0.7815$. Evaluating retrieval quality across the 50 expert-evaluated campus incidents, where a retrieved SOP was adjudged relevant when at least two of three blind experts confirmed its applicability to the incident, FAISS vector retrieval achieves a Hit@2 of $96.0\%$ (48/50 cases successfully retrieved directly relevant institutional SOPs under $\theta_{\text{RAG}} \ge 0.75$). Furthermore, quantizing Phi-3 Mini to 4-bit NormalFloat (NF4) reduces peak allocated GPU tensor memory (measured via \texttt{torch.cuda.max\_memory\_allocated()} during generation) from $7.60\text{~GB}$ to $1.80\text{~GB}$ ($76.3\%$ compression) while maintaining high reference-text overlap ($0.8420$ vs $0.8625$ in FP16, a $97.6\%$ similarity retention) alongside high expert diagnosis correctness ($4.76/5.0$). The end-to-end RCA pipeline executes in $880.5 \pm 52.1$~ms (BGE retrieval: $4.2 \pm 0.3$~ms; prompt assembly: $1.8 \pm 0.2$~ms; LLM report synthesis: $874.5 \pm 52.0$~ms, comprising TTFT $= 42.5 \pm 2.1$~ms with prefix caching and autoregressive decoding at $5.20 \pm 0.15$~ms/token across $160 \pm 9$ JSON tokens).
 
@@ -302,7 +302,7 @@ Mistral-7B (AWQ INT4 + RAG) & --- & --- & 0.8540 & 0.7950 & 1,476 ms & 4.10 GB \
 }
 \end{table}
 
-\textbf{Variant-Blind Expert Evaluation}: Three senior network security administrators evaluated 50 randomly sampled incident playbooks (blinded to model and quantization variant identities) on a 5-point Likert scale across four operational dimensions:
+\textbf{Variant-Blind Expert Evaluation}: Three senior network security administrators evaluated 50 randomly sampled incident playbooks generated by our proposed Phi-3 Mini (NF4 + RAG) configuration (blinded to the underlying model and quantization identity) on a 5-point Likert scale across four operational dimensions:
 (1) \emph{Factual Telemetry}: $4.82 \pm 0.36 / 5.0$;
 (2) \emph{Diagnosis Correctness}: $4.76 \pm 0.42 / 5.0$;
 (3) \emph{Actionability}: $4.68 \pm 0.48 / 5.0$;
@@ -335,7 +335,7 @@ We presented an LLM-Augmented AIOps Framework for real-time log anomaly detectio
 \section*{Acknowledgment}
 The authors thank the Faculty of Information Technology, Ho Chi Minh City University of Foreign Languages - Information Technology (HUFLIT), Ho Chi Minh City, Vietnam for providing the production campus log telemetry and computing infrastructure. In compliance with Springer Nature authorship policies, generative AI tools were used to assist in literature review verification, manuscript refinement, and English copy-editing; all core technical research, architectural designs, empirical implementations, and experimental evaluations were conducted directly by the authors.
 
-\enlargethispage{3.5\baselineskip}
+\enlargethispage{5.0\baselineskip}
 \begin{thebibliography}{24}\fontsize{5.5pt}{6.5pt}\selectfont
 \setlength{\itemsep}{-1.1pt}
 \setlength{\parskip}{0pt}
@@ -344,7 +344,7 @@ The authors thank the Faculty of Information Technology, Ho Chi Minh City Univer
 \bibitem{ref_deeplog} Du, M., Li, F., Zheng, G., Srikumar, V.: DeepLog: Anomaly Detection and Diagnosis from System Logs through Deep Learning. In: Proc. ACM SIGSAC Conf. Comput. Commun. Secur. (CCS), pp. 1285--1298 (2017).
 \bibitem{ref_loganomaly} Meng, W., Liu, Y., Zhu, Y., et al.: LogAnomaly: Unsupervised Detection of Sequential and Quantitative Anomalies in Unstructured Logs. In: Proc. 28th Int. Joint Conf. Artif. Intell. (IJCAI), pp. 4739--4745 (2019).
 \bibitem{ref_logrobust} Zhang, X., Xu, Y., Lin, Q., et al.: Robust Log-Based Anomaly Detection on Unstable Log Data. In: Proc. 27th ACM Joint Eur. Softw. Eng. Conf. Symp. Found. Softw. Eng. (ESEC/FSE), pp. 807--817 (2019).
-\bibitem{ref_swisslog} Li, X., Chen, P., Jing, L., He, Z., Yu, G.: SwissLog: Robust and Unified Anomaly Detection and Localization for Distributed System Logs. IEEE Trans. Dependable Secure Comput. 20(4), 2762--2780 (2023). \url{https://doi.org/10.1109/TDSC.2022.3162857}
+\bibitem{ref_swisslog} Li, X., Chen, P., Jing, L., He, Z., Yu, G.: SwissLog: Robust Anomaly Detection and Localization for Interleaved Unstructured Logs. IEEE Trans. Dependable Secure Comput. 20(4), 2762--2780 (2023). \url{https://doi.org/10.1109/TDSC.2022.3162857}
 \bibitem{ref_pca} Xu, W., Huang, L., Fox, A., Patterson, D., Jordan, M.I.: Mining Console Logs for Large-Scale System Problem Detection. In: Proc. 3rd Conf. SysML (2008).
 \bibitem{ref_tcn} Bai, S., Kolter, J.Z., Koltun, V.: An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling. arXiv preprint arXiv:1803.01271 (2018).
 \bibitem{ref_attention} Vaswani, A., Shazeer, N., Parmar, N., et al.: Attention Is All You Need. In: Adv. Neural Inf. Process. Syst. (NeurIPS), vol. 30, pp. 5998--6008 (2017).

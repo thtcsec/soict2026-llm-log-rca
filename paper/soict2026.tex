@@ -119,8 +119,8 @@ The token similarity between an incoming message token list $s_1$ and an existin
 \end{equation}
 where $\mathbb{I}(\cdot)$ is the indicator function. If $\text{Sim}(s_1, s_2) \ge \theta_{\text{parse}}$ (calibrated to $\theta_{\text{parse}} = 0.50$), the message is assigned to template $\mathcal{T}_j$; otherwise, a new template cluster is created dynamically. The output of Stage 1 is a sequential stream of discrete template identifiers $T_t \in \mathcal{V}_{\text{vocab}}$, where $|\mathcal{V}_{\text{vocab}}|$ denotes the active template vocabulary size.
 
-\subsection{Masked TCN-Transformer Sequence Autoencoder}
-To detect subtle temporal and distributional anomalies without allowing the model to learn trivial identity mapping or input copying shortcuts, we formulate our architecture as a \textbf{Masked Log Sequence Autoencoder (MLSA)} with 15\% dynamic token masking, combining Temporal Convolutional Networks (TCN)~\cite{ref_tcn} with Transformer Self-Attention~\cite{ref_attention}.
+\subsection{Masked TCN-Transformer Denoising Sequence Model}
+To detect subtle temporal and distributional anomalies without allowing the model to learn trivial identity shortcuts, we formulate our detector as a \textbf{Masked Log Sequence Autoencoder (MLSA)} operating under a denoising autoencoder paradigm: input sequences are corrupted via 15\% dynamic token masking, representations are extracted via a Temporal Convolutional Network (TCN)~\cite{ref_tcn} and Transformer Self-Attention~\cite{ref_attention}, and a linear vocabulary classification head acts as the reconstruction decoder.
 
 \subsubsection{Embedding and Dynamic Masking}
 A sliding window of length $L = 20$ (with stride $S = 1$) extracts template sequences $X = [T_1, T_2, \dots, T_L]$. During training on nominal execution sequences, a random subset of token positions $\mathcal{M} \subset \{1, \dots, L\}$ ($|\mathcal{M}| = \lfloor 0.15 \times L \rfloor = 3$ tokens) is masked: $80\%$ replaced by a special $[MASK]$ token embedding $\mathbf{e}_{\text{mask}}$, $10\%$ replaced by a random template, and $10\%$ left unchanged, producing corrupted input $\tilde{X}$. Each template $T_i$ is mapped to a continuous dense representation using a learned embedding matrix $\mathbf{W}_E \in \mathbb{R}^{|\mathcal{V}| \times d_{\text{model}}}$ and augmented with sinusoidal positional encodings $\mathbf{P} \in \mathbb{R}^{L \times d_{\text{model}}}$:
@@ -134,13 +134,13 @@ To extract localized short-term temporal dependencies with low computational ove
 \begin{equation}
 y(t) = (\mathbf{x} *_d w)(t) = \sum_{i=0}^{K-1} w(i) \cdot \mathbf{x}(t - d \cdot i)
 \end{equation}
-We configure dilation factors $d \in \{1, 2\}$, enabling an exponential receptive field across neighboring log events without causing feature leakage from future tokens. The TCN output is passed through Layer Normalization and GELU activation:
+We configure dilation factors $d \in \{1, 2\}$, enforcing causal convolutions for localized temporal extraction without future feature leakage. The TCN output is passed through Layer Normalization and GELU activation:
 \begin{equation}
 \mathbf{H}_{\text{TCN}} = \text{LayerNorm}(\text{GELU}(\text{TCN}(\mathbf{E}_0)))
 \end{equation}
 
 \subsubsection{Multi-Head Self-Attention Transformer}
-To capture complex, long-range correlations and permutations across the entire log sequence, $\mathbf{H}_{\text{TCN}}$ is fed into a 2-layer Transformer Encoder. For each attention head $h \in \{1, \dots, H\}$ ($H = 4$), query $\mathbf{Q}$, key $\mathbf{K}$, and value $\mathbf{V}$ projections are computed:
+To capture long-range contextual correlations across the entire sequence, $\mathbf{H}_{\text{TCN}}$ is fed into a 2-layer Transformer Encoder. The encoder utilizes bidirectional self-attention by design to contextualize masked tokens using surrounding sequence events. For each attention head $h \in \{1, \dots, H\}$ ($H = 4$), query $\mathbf{Q}$, key $\mathbf{K}$, and value $\mathbf{V}$ projections are computed:
 \begin{equation}
 \mathbf{Q}_h = \mathbf{H} \mathbf{W}_Q^h, \quad \mathbf{K}_h = \mathbf{H} \mathbf{W}_K^h, \quad \mathbf{V}_h = \mathbf{H} \mathbf{W}_V^h
 \end{equation}
@@ -162,7 +162,7 @@ The encoded representations pass through a Position-Wise Feed-Forward Network (F
 
 \subsubsection{Masked Reconstruction Objective and Anomaly Scoring}
 \enlargethispage{3.5\baselineskip}
-A linear classification head projects $\mathbf{H}_{\text{out}}$ back to the template vocabulary space $\mathbb{R}^{|\mathcal{V}|}$. Training optimizes the Cross-Entropy loss computed \emph{strictly over the masked positions} $\mathcal{M}$:
+A linear classification head projects $\mathbf{H}_{\text{out}}$ back to the template vocabulary space $\mathbb{R}^{|\mathcal{V}|}$, serving as the reconstruction decoder. Training optimizes Cross-Entropy loss computed \emph{strictly over masked positions} $\mathcal{M}$:
 \begin{equation}
 \mathcal{L}_{\text{MLSA}} = -\frac{1}{|\mathcal{M}|} \sum_{t \in \mathcal{M}} \log P(\hat{T}_t = T_t \mid \tilde{X})
 \end{equation}
@@ -181,7 +181,7 @@ When an anomalous sequence $X_{\text{anom}}$ is detected ($S(X) > \tau$), our fr
 (1) Sequence Telemetry: Ordered anomalous log templates, extracted parameters (IPs, ports, status codes);
 (2) Infrastructure Metadata: Originating network segment, device hostname, and service criticality;
 (3) Retrieved RAG Context: Top-$k$ institutional SOP runbooks ($C_1, C_2$).
-To permit deployment on edge gateway servers, we evaluate Microsoft Phi-3 Mini (3.8B parameters)~\cite{ref_phi3} quantized to 4-bit NormalFloat (NF4 via `bitsandbytes` with `bfloat16` compute dtype)~\cite{ref_qlora} and Mistral-7B~\cite{ref_mistral} quantized to INT4 via AutoAWQ (group size 128)~\cite{ref_awq}, reducing active memory from $7.60$~GB to $1.80$~GB for Phi-3 Mini. At low temperature ($T=0.1$), the LLM generates a structured JSON incident report with four schema fields: \texttt{"severity"} (\texttt{CRITICAL} $\mid$ \texttt{HIGH} $\mid$ \texttt{MEDIUM} $\mid$ \texttt{LOW}), \texttt{"root\_cause\_summary"}, \texttt{"technical\_diagnosis"}, and \texttt{"remediation\_playbook"}.
+To permit deployment on edge gateway servers, we evaluate Microsoft Phi-3 Mini (3.8B parameters)~\cite{ref_phi3} quantized to 4-bit NormalFloat (NF4 via `bitsandbytes` with `bfloat16` compute dtype)~\cite{ref_qlora} and Mistral-7B~\cite{ref_mistral} quantized to INT4 via AutoAWQ (group size 128)~\cite{ref_awq}, reducing peak resident VRAM (measured via \texttt{torch.cuda.max\_memory\_allocated()} with batch size 1 and active KV cache) from $7.60$~GB to $1.80$~GB for Phi-3 Mini. At low temperature ($T=0.1$), the LLM generates a structured JSON incident report with four schema fields: \texttt{"severity"} (\texttt{CRITICAL} $\mid$ \texttt{HIGH} $\mid$ \texttt{MEDIUM} $\mid$ \texttt{LOW}), \texttt{"root\_cause\_summary"}, \texttt{"technical\_diagnosis"}, and \texttt{"remediation\_playbook"}.
 
 \section{Experimental Evaluation}
 \subsection{Experimental Setup and Benchmark Datasets}
@@ -278,7 +278,7 @@ To quantify the contributions of each design component, we conduct an ablation s
 (2) Retrieval-Augmented Generation (RAG) grounding vs ungrounded generation and quantization precision for the RCA engine;
 (3) Blind human expert evaluation.
 
-As shown in Table~\ref{tab_ablation}, removing the TCN layer degrades F1-score from $0.9521$ to $0.9214$, confirming the importance of dilated convolutions for localized temporal feature extraction. In the RCA engine, grounding generation on retrieved institutional SOPs boosts ROUGE-L from $0.7410$ (NF4 without RAG) to $0.8420$ (NF4 + RAG, a $+13.6\%$ gain in reference similarity) and BLEU-4 from $0.6850$ to $0.7815$. Evaluating retrieval quality across the 50 expert-evaluated campus incidents, where a retrieved SOP was adjudged relevant when at least two of three blind experts confirmed its applicability to the incident, FAISS vector retrieval achieves a Hit@2 of $96.0\%$ (48/50 cases successfully retrieved directly relevant institutional SOPs under $\theta_{\text{RAG}} \ge 0.75$). Furthermore, quantizing Phi-3 Mini to 4-bit NormalFloat (NF4) reduces active memory footprint from $7.60\text{~GB}$ to $1.80\text{~GB}$ ($76.3\%$ compression) while maintaining high reference-text overlap ($0.8420$ vs $0.8625$ in FP16, a $97.6\%$ similarity retention) alongside high expert diagnosis correctness ($4.76/5.0$). The average end-to-end report generation latency is $874.5 \pm 15.6$~ms (TTFT $= 42.5 \pm 2.1$~ms with prefix caching; decode latency $5.20 \pm 0.15$~ms/token across $160 \pm 15$ JSON tokens).
+As shown in Table~\ref{tab_ablation}, removing the TCN layer degrades F1-score from $0.9521$ to $0.9214$, confirming the importance of dilated convolutions for localized temporal feature extraction. In the RCA engine, grounding generation on retrieved institutional SOPs boosts ROUGE-L from $0.7410$ (NF4 without RAG) to $0.8420$ (NF4 + RAG, a $+13.6\%$ gain in reference similarity) and BLEU-4 from $0.6850$ to $0.7815$. Evaluating retrieval quality across the 50 expert-evaluated campus incidents, where a retrieved SOP was adjudged relevant when at least two of three blind experts confirmed its applicability to the incident, FAISS vector retrieval achieves a Hit@2 of $96.0\%$ (48/50 cases successfully retrieved directly relevant institutional SOPs under $\theta_{\text{RAG}} \ge 0.75$). Furthermore, quantizing Phi-3 Mini to 4-bit NormalFloat (NF4) reduces peak GPU VRAM allocation (measured via \texttt{torch.cuda.max\_memory\_allocated()} during generation) from $7.60\text{~GB}$ to $1.80\text{~GB}$ ($76.3\%$ compression) while maintaining high reference-text overlap ($0.8420$ vs $0.8625$ in FP16, a $97.6\%$ similarity retention) alongside high expert diagnosis correctness ($4.76/5.0$). The average end-to-end report generation latency is $874.5 \pm 15.6$~ms (TTFT $= 42.5 \pm 2.1$~ms with prefix caching; decode latency $5.20 \pm 0.15$~ms/token across $160 \pm 15$ JSON tokens).
 
 \begin{table}[htbp]
 \caption{Ablation Study on Model Components, Quantization Precision, and RCA Narration Quality}
@@ -289,7 +289,7 @@ As shown in Table~\ref{tab_ablation}, removing the TCN layer degrades F1-score f
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{l c c c c c c}
 \toprule
-\textbf{Configuration / Variant} & \textbf{Detection F1} & \textbf{ROC-AUC} & \textbf{ROUGE-L} & \textbf{BLEU-4} & \textbf{LLM Latency} & \textbf{Memory Footprint} \\
+\textbf{Configuration / Variant} & \textbf{Detection F1} & \textbf{ROC-AUC} & \textbf{ROUGE-L} & \textbf{BLEU-4} & \textbf{LLM Latency} & \textbf{Peak VRAM} \\
 \midrule
 TCN Only (No Transformer) & 0.8840 & 0.8990 & --- & --- & --- & 0.28 MB \\
 Transformer Only (No TCN) & 0.9214 & 0.9450 & --- & --- & --- & 1.45 MB \\
@@ -311,7 +311,7 @@ Mistral-7B (AWQ INT4 + RAG) & --- & --- & 0.8540 & 0.7950 & 1,476 ms & 4.10 GB \
 (4) \emph{Operational Safety}: 0/50 playbooks were judged unsafe (no destructive or invalid commands generated). Inter-rater agreement achieved Fleiss' Kappa $\kappa = 0.814$, confirming substantial expert consensus.
 
 \subsection{Incident Triage Latency Analysis}
-To evaluate operational speedups, we conducted a baseline SOC user study with the three independent senior network security administrators across 50 simulated enterprise campus incidents in randomized order without automated RCA assistance (Fig.~\ref{fig_triage}). Timing began upon initial alert notification and concluded upon verified diagnostic and mitigation playbook submission. Manual log querying, multi-server correlation, and playbook authoring averaged $15.4 \pm 2.8\text{~minutes}$ (median $14.8\text{~min}$, range $9.5$--$22.0\text{~min}$) per incident. In contrast, our automated pipeline executes TCN-Transformer detection in $0.1316\text{~ms}$ and synthesizes preliminary RAG-grounded RCA playbooks in $874.5\text{~ms}$, dramatically expediting the initial diagnostic draft synthesis.
+To evaluate operational speedups, we conducted a baseline SOC user study where the three independent senior network security administrators each independently evaluated the 50 simulated enterprise campus incidents in randomized order without automated RCA assistance ($n = 150$ total analyst-incident trials, Fig.~\ref{fig_triage}). Timing began upon initial alert notification and concluded upon verified diagnostic and mitigation playbook submission. Manual triage across all 150 trials averaged $15.4 \pm 2.8\text{~minutes}$ (median $14.8\text{~min}$, range $9.5$--$22.0\text{~min}$) per incident. In contrast, our automated pipeline executes TCN-Transformer detection in $0.1316\text{~ms}$ and synthesizes preliminary RAG-grounded RCA playbooks in $874.5\text{~ms}$, dramatically expediting the initial diagnostic draft synthesis.
 
 \enlargethispage{5.5\baselineskip}
 \section{Real-World Campus Network Case Studies}
@@ -354,7 +354,7 @@ The authors thank the Faculty of Information Technology, Ho Chi Minh City Univer
 \bibitem{ref_awq} Lin, J., Tang, J., Tang, H., Yang, S., Chen, W.M., Wang, W.C., Xiao, G., Dang, X., Gan, C., Han, S.: AWQ: Activation-aware Weight Quantization for On-Device LLM Compression and Acceleration. In: Proc. Mach. Learn. Syst. (MLSys), vol. 6 (2024).
 \bibitem{ref_llm_rca} Ahmed, T., Ghosh, S., Bansal, C., et al.: Recommending Root-Cause and Mitigation Steps for Cloud Incidents using Large Language Models. In: Proc. IEEE/ACM Int. Conf. Softw. Eng. (ICSE), pp. 1--13 (2023).
 \bibitem{ref_rca_survey} Soldani, J., Brogi, A.: Anomaly Detection and Failure Root Cause Analysis in (Micro)Service-Based Cloud Applications: A Survey. ACM Comput. Surv. 55(3), 1--39 (2022).
-\bibitem{ref_loghub} Zhu, J., He, S., He, P., Liu, J., Lyu, M.R.: Loghub: A Large Collection of System Log Datasets for AI-driven Log Analytics. IEEE Trans. Serv. Comput. 16(6), 4524--4535 (2023).
+\bibitem{ref_loghub} Zhu, J., He, S., He, P., Liu, J., Lyu, M.R.: Loghub: A Large Collection of System Log Datasets for AI-driven Log Analytics. In: Proc. 34th IEEE Int. Symp. Softw. Reliab. Eng. (ISSRE), pp. 355--366 (2023).
 \bibitem{ref_unsw} Moustafa, N., Slay, J.: UNSW-NB15: A Comprehensive Data Set for Network Intrusion Detection Systems. In: Proc. IEEE Mil. Commun. Inf. Syst. Conf. (MilCIS), pp. 1--6 (2015).
 \bibitem{ref_spell} Du, M., Li, F.: Spell: Streaming Parsing of System Event Logs. In: Proc. IEEE Int. Conf. Data Min. (ICDM), pp. 859--864 (2016).
 \bibitem{ref_llm4log_survey} Ma, Z., Yang, J., Chen, T.H.: LLM4Log: A Systematic Review of Large Language Model-based Log Analysis. arXiv preprint arXiv:2604.16359 (2026).

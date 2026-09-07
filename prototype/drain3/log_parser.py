@@ -1,14 +1,14 @@
 """
-log_parser.py - Streaming Log Parser using Drain3 for SOICT 2026 Pipeline
+log_parser.py - Legacy custom similarity parser (not Drain/Drain3)
 """
 
 import re
 import json
 import numpy as np
 
-class SimplifiedDrain3Parser:
+class LegacySimilarityParser:
     """
-    Lightweight Drain3-compatible online log parser for streaming enterprise campus logs.
+    Lightweight token-similarity parser. It has no Drain fixed-depth tree.
     """
     def __init__(self, sim_th=0.6, depth=4):
         self.sim_th = sim_th
@@ -75,8 +75,8 @@ if __name__ == "__main__":
         "2026-08-11 10:00:04 auth_service IP 192.168.1.52 User guest login failed invalid password"
     ]
     
-    parser = SimplifiedDrain3Parser()
+    parser = LegacySimilarityParser()
     parsed = parser.parse_batch(sample_logs)
-    print("[+] Drain3 Parsed Results:")
+    print("[+] Custom similarity parser results:")
     for t_id, t_str in parsed:
         print(f"  Template #{t_id}: {t_str}")

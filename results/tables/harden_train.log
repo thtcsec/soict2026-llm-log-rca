@@ -1,0 +1,132 @@
+========================================================================
+ SOICT 2026 — HARDENED HUFLIT TRAIN (honest / chrono / multi-seed)
+ Device: cpu
+ Data : D:\huflit-campus-logs
+========================================================================
+  [skip large] forti-idc_20260615_155805.zip::raw/access/date=2026-06-15-2026-06-15.log (892 MB)
+  [skip large] forti-svh_20260615_151641.zip::raw/access/date=2026-06-15-2026-06-15.log (3436 MB)
+  [skip large] forti-bagia_20260616_101553.zip::raw/access/date=2026-06-15-2026-06-15.log (716 MB)
+  [skip large] forti-idc_20260616_141059.zip::raw/access/date=2026-06-15-2026-06-15.log (1135 MB)
+  [skip large] forti-bagia_20260617_095007.zip::raw/access/date=2026-06-16-2026-06-16.log (610 MB)
+Eligible .log members: 170
+  • 15062026/aca_20260615_083135.zip :: nginx-access-2026-06-12.log (16.6 MB)
+  • 15062026/aca_20260615_083135.zip :: nginx-access-2026-06-13.log (2.6 MB)
+  • 15062026/aca_20260615_083135.zip :: nginx-access-2026-06-14.log (2.5 MB)
+  • 15062026/aca_20260615_083135.zip :: nginx-access-2026-06-15.log (2.4 MB)
+  • 15062026/aca_20260615_083135.zip :: nginx-error-2026-06-10.log (0.0 MB)
+  • 15062026/aca_20260615_083135.zip :: sshd-2026-06-12.log (0.0 MB)
+  • 15062026/careerhub_20260615_084125.zip :: apache-access-2026-06-12.log (33.9 MB)
+  • 15062026/careerhub_20260615_084125.zip :: apache-access-2026-06-13.log (26.8 MB)
+  • 15062026/careerhub_20260615_084125.zip :: apache-access-2026-06-14.log (24.4 MB)
+  • 15062026/careerhub_20260615_084125.zip :: apache-access-2026-06-15.log (8.6 MB)
+  • 16062026/aca_20260616_084744.zip :: nginx-access-2026-06-15.log (20.8 MB)
+  • 16062026/aca_20260616_084744.zip :: nginx-access-2026-06-16.log (3.5 MB)
+  • 16062026/aca_20260616_084744.zip :: nginx-error-2026-06-16.log (0.0 MB)
+  • 16062026/aca_20260616_084744.zip :: sshd-2026-06-15.log (0.0 MB)
+  • 16062026/careerhub_20260616_085748.zip :: apache-access-2026-06-15.log (40.0 MB)
+  • 16062026/careerhub_20260616_085748.zip :: apache-access-2026-06-16.log (11.1 MB)
+  • 16062026/careerhub_20260616_085748.zip :: apache-error-2026-06-15.log (0.0 MB)
+  • 16062026/careerhub_20260616_085748.zip :: apache-error-2026-06-16.log (0.0 MB)
+  • 16062026/careerhub_20260616_085748.zip :: sshd-2026-06-15.log (0.0 MB)
+  • 16062026/courses_20260616_083155.zip :: nginx-access-2026-06-15.log (461.9 MB)
+  • 16062026/courses_20260616_083155.zip :: nginx-access-2026-06-16.log (45.8 MB)
+  • 17062026/aca_20260617_085452.zip :: nginx-access-2026-06-16.log (17.4 MB)
+  • 17062026/aca_20260617_085452.zip :: nginx-access-2026-06-17.log (2.3 MB)
+  • 17062026/aca_20260617_085452.zip :: nginx-error-2026-06-16.log (0.0 MB)
+  • 17062026/aca_20260617_085452.zip :: sshd-2026-06-15.log (0.0 MB)
+  • 17062026/careerhub_20260617_085920.zip :: apache-access-2026-06-16.log (44.8 MB)
+  • 17062026/careerhub_20260617_085920.zip :: apache-access-2026-06-17.log (8.4 MB)
+  • 17062026/careerhub_20260617_085920.zip :: apache-error-2026-06-16.log (0.0 MB)
+  • 17062026/careerhub_20260617_085920.zip :: apache-error-2026-06-17.log (0.0 MB)
+  • 17062026/careerhub_20260617_085920.zip :: sshd-2026-06-16.log (0.0 MB)
+  • 17062026/courses_20260617_081830.zip :: nginx-access-2026-06-16.log (481.5 MB)
+  • 17062026/courses_20260617_081830.zip :: nginx-access-2026-06-17.log (47.2 MB)
+  • 17062026/courses_20260617_081830.zip :: nginx-error-2026-06-16.log (0.2 MB)
+  • 17062026/courses_20260617_081830.zip :: nginx-error-2026-06-17.log (0.0 MB)
+  • 17062026/courses_20260617_081830.zip :: sshd-2026-06-16.log (0.0 MB)
+  • 17062026/forti-bagia_20260617_095007.zip :: date=2026-06-17-2026-06-17.log (162.7 MB)
+  • 18062026/aca_20260618_084618.zip :: nginx-access-2026-06-17.log (46.2 MB)
+  • 18062026/aca_20260618_084618.zip :: nginx-access-2026-06-18.log (4.7 MB)
+  • 18062026/aca_20260618_084618.zip :: nginx-error-2026-06-16.log (0.0 MB)
+  • 18062026/aca_20260618_084618.zip :: sshd-2026-06-15.log (0.0 MB)
+  • 18062026/careerhub_20260618_084831.zip :: apache-access-2026-06-17.log (30.8 MB)
+  • 18062026/careerhub_20260618_084831.zip :: apache-access-2026-06-18.log (8.3 MB)
+  • 18062026/careerhub_20260618_084831.zip :: apache-error-2026-06-17.log (0.0 MB)
+  • 18062026/careerhub_20260618_084831.zip :: apache-error-2026-06-18.log (0.0 MB)
+  • 18062026/careerhub_20260618_084831.zip :: sshd-2026-06-17.log (0.1 MB)
+  • 18062026/courses_20260618_082955.zip :: nginx-access-2026-06-17.log (378.3 MB)
+  • 18062026/courses_20260618_082955.zip :: nginx-access-2026-06-18.log (45.2 MB)
+  • 18062026/courses_20260618_082955.zip :: nginx-error-2026-06-17.log (0.1 MB)
+  • 18062026/courses_20260618_082955.zip :: nginx-error-2026-06-18.log (0.0 MB)
+  • 18062026/courses_20260618_082955.zip :: sshd-2026-06-16.log (0.0 MB)
+  • 18062026/portal_20260618_083752.zip :: portal.huflit.edu.vn_access-2026-06-17.log (89.8 MB)
+  • 19062026/aca_20260619_093444.zip :: nginx-access-2026-06-18.log (25.5 MB)
+  • 19062026/aca_20260619_093444.zip :: nginx-access-2026-06-19.log (4.2 MB)
+  • 19062026/aca_20260619_093444.zip :: nginx-error-2026-06-16.log (0.0 MB)
+  • 19062026/aca_20260619_093444.zip :: sshd-2026-06-15.log (0.0 MB)
+  • 19062026/careerhub_20260619_094357.zip :: apache-access-2026-06-18.log (35.5 MB)
+  • 19062026/careerhub_20260619_094357.zip :: apache-access-2026-06-19.log (7.0 MB)
+  • 19062026/careerhub_20260619_094357.zip :: apache-error-2026-06-18.log (0.0 MB)
+  • 19062026/careerhub_20260619_094357.zip :: apache-error-2026-06-19.log (0.0 MB)
+  • 19062026/careerhub_20260619_094357.zip :: sshd-2026-06-18.log (0.0 MB)
+  • 19062026/careerhub_20260619_094357.zip :: sshd-2026-06-19.log (14.2 MB)
+  • 19062026/careerhub_20260619_141535.zip :: apache-access-2026-06-19.log (12.3 MB)
+  • 19062026/careerhub_20260619_141535.zip :: apache-error-2026-06-19.log (0.0 MB)
+  • 19062026/careerhub_20260619_141535.zip :: sshd-2026-06-19.log (14.2 MB)
+Streamed 1,000,000 lines (~0.3689 GB text) in 162.6s
+Line anomaly rate (proxy labels): 7.96%
+  train: 79,999 seqs | anomaly 37.62%
+  val  : 9,999 seqs | anomaly 38.32%
+  test : 9,999 seqs | anomaly 80.47%
+  nominal train seqs: 49,901 / 79,999
+
+  === seed 42 ===
+    epoch 1/6 loss=0.6856
+    epoch 2/6 loss=0.0814
+    epoch 3/6 loss=0.0378
+    epoch 4/6 loss=0.0228
+    epoch 5/6 loss=0.0167
+    epoch 6/6 loss=0.0116
+    test F1=0.5801 AUC=0.7713 P=0.9208 R=0.4234 lat=0.1370ms
+
+  === seed 101 ===
+    epoch 1/6 loss=0.6993
+    epoch 2/6 loss=0.0868
+    epoch 3/6 loss=0.0369
+    epoch 4/6 loss=0.0239
+    epoch 5/6 loss=0.0149
+    epoch 6/6 loss=0.0123
+    test F1=0.3120 AUC=0.8044 P=0.8952 R=0.1889 lat=0.1288ms
+
+  === seed 202 ===
+    epoch 1/6 loss=0.7027
+    epoch 2/6 loss=0.0864
+    epoch 3/6 loss=0.0382
+    epoch 4/6 loss=0.0245
+    epoch 5/6 loss=0.0161
+    epoch 6/6 loss=0.0117
+    test F1=0.1926 AUC=0.7487 P=0.7272 R=0.1110 lat=0.1018ms
+
+  === seed 303 ===
+    epoch 1/6 loss=0.6947
+    epoch 2/6 loss=0.0836
+    epoch 3/6 loss=0.0389
+    epoch 4/6 loss=0.0234
+    epoch 5/6 loss=0.0167
+    epoch 6/6 loss=0.0107
+    test F1=0.0559 AUC=0.7370 P=0.4228 R=0.0300 lat=0.1060ms
+
+  === seed 404 ===
+    epoch 1/6 loss=0.6814
+    epoch 2/6 loss=0.0829
+    epoch 3/6 loss=0.0380
+    epoch 4/6 loss=0.0234
+    epoch 5/6 loss=0.0146
+    epoch 6/6 loss=0.0115
+    test F1=0.6652 AUC=0.8096 P=0.9573 R=0.5097 lat=0.1227ms
+
+========================================================================
+ HARDENED HUFLIT RESULTS (mean ± std over 5 seeds)
+  F1=0.3612±0.2571  AUC=0.7742±0.0324  P=0.7847  R=0.2526  lat=0.1193 ms
+  Saved → D:\tu_projects\LatexProject\soict2026\results\tables\huflit_hardened_results.json
+========================================================================

@@ -32,7 +32,7 @@ def fmt(v, decimals=4):
 
 def build_dataset_table_rows(results):
     sizes = {
-        "HUFLIT Campus Logs (Real)":        ("19.28 GB", "14,850,220"),
+        "HUFLIT Campus Logs (Selective Stream)": ("368,940,230 streamed bytes", "1,000,000"),
         "BGL Supercomputer (Blue Gene/L)":  ("744 MB",   "4,747,963"),
         "HDFS Distributed Cluster Logs":    ("1.58 GB",  "11,175,629"),
         "UNSW-NB15 Network Intrusion":      ("100 MB",   "254,004"),
@@ -112,4 +112,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(
+        "Retired updater: its legacy schema can overwrite audited tables. "
+        "Use huflit_baselines.json and update the manuscript deliberately."
+    )

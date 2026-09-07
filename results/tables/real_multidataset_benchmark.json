@@ -1,6 +1,6 @@
 [
   {
-    "name": "HUFLIT Campus Logs (Real)",
+    "name": "LEGACY—NOT PAPER EVIDENCE: HUFLIT Campus Logs",
     "train_samples": 39998,
     "test_samples": 10000,
     "test_anomaly_pct": 0.2,
@@ -14,7 +14,7 @@
     "training_time_sec": 188.68
   },
   {
-    "name": "BGL Supercomputer (Blue Gene/L)",
+    "name": "LEGACY—NOT PAPER EVIDENCE: BGL Supercomputer",
     "train_samples": 198,
     "test_samples": 50,
     "test_anomaly_pct": 26.0,
@@ -28,7 +28,7 @@
     "training_time_sec": 0.75
   },
   {
-    "name": "HDFS Distributed Cluster Logs",
+    "name": "LEGACY—NOT PAPER EVIDENCE: HDFS Distributed Cluster Logs",
     "train_samples": 198,
     "test_samples": 50,
     "test_anomaly_pct": 12.0,
@@ -42,7 +42,7 @@
     "training_time_sec": 0.87
   },
   {
-    "name": "UNSW-NB15 Network Intrusion",
+    "name": "LEGACY—NOT PAPER EVIDENCE: UNSW-NB15 Network Intrusion",
     "train_samples": 12000,
     "test_samples": 3000,
     "test_anomaly_pct": 11.83,

@@ -1,0 +1,8 @@
+Thang6.rar was moved (not copied, not extracted) to:
+
+  D:\huflit-campus-logs\_archives\Thang6.rar
+
+Do NOT extract it. Uncompressed size is ~21.1 GB and the large files are already on disk under huflit-campus-logs\16062026\.
+
+Campus logs canonical path: D:\huflit-campus-logs
+This repo still sees them via junction: data\raw\huflit_logs

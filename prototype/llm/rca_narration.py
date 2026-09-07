@@ -1,14 +1,12 @@
-"""
-rca_narration.py - Foundation Model Root Cause Analysis (RCA) Generator for SOICT 2026
-"""
+"""Unevaluated RCA interface mock for the SOICT 2026 design."""
 
 import json
-import time
-
-class LLMRCANarrationEngine:
+class RCANarrationDesignMock:
     """
-    Simulates / Invokes Lightweight Quantized Foundation Model (Phi-3 / Mistral)
-    to generate natural language Root Cause Analysis & Remediation Hints.
+    Builds the intended prompt and returns a schema placeholder.
+
+    This class does not invoke an LLM, retrieve a runbook, infer a root cause, or
+    measure latency. Its output must not be used as experimental evidence.
     """
     def __init__(self, model_name="Phi-3-mini-4k-instruct-INT4"):
         self.model_name = model_name
@@ -35,38 +33,20 @@ Affected Services: {context_metadata.get('services', 'Authentication & Core Gate
         return prompt
 
     def generate_rca(self, anomalous_sequence, anomaly_score, context_metadata):
-        start_time = time.time()
         prompt = self.construct_prompt(anomalous_sequence, anomaly_score, context_metadata)
-        
-        # Simulated LLM Inference output (Deterministic high-quality structured response for benchmarking)
-        if "login failed" in str(anomalous_sequence).lower() or anomaly_score > 0.85:
-            rca_output = {
-                "severity": "CRITICAL",
-                "root_cause_summary": "High-density Credential Stuffing / Brute-Force Authentication Attack detected targeting Campus Active Directory.",
-                "technical_explanation": "A sequence of 45 consecutive failed login attempts originating from untrusted VLAN range within 3.2 seconds. Indicates automated password dictionary attack aiming at credential harvest.",
-                "remediation_playbook": [
-                    "Isolate source IP/MAC via OpenFlow flow_mod drop rule on Core Switch.",
-                    "Enforce 15-minute account lockout on targeted LDAP accounts.",
-                    "Trigger automated 2FA re-authentication prompt for affected user sessions."
-                ],
-                "inference_time_ms": round((time.time() - start_time + 0.125) * 1000, 2)
-            }
-        else:
-            rca_output = {
-                "severity": "HIGH",
-                "root_cause_summary": "Inter-VLAN Spanning Tree Protocol (STP) Loop causing packet storm on Edge Switch 4.",
-                "technical_explanation": "Abnormal volume of broadcast storm log templates coupled with high packet loss. Uncontrolled loop saturating gateway bandwidth.",
-                "remediation_playbook": [
-                    "Activate BPDU Guard on Port 12 of Edge Switch 4.",
-                    "Reroute critical academic traffic through backup optical backbone link."
-                ],
-                "inference_time_ms": round((time.time() - start_time + 0.110) * 1000, 2)
-            }
-            
-        return rca_output
+        return {
+            "evaluation_status": "DESIGN_ONLY_NOT_MODEL_OUTPUT",
+            "prompt_preview": prompt,
+            "severity": None,
+            "root_cause_summary": None,
+            "technical_explanation": None,
+            "retrieved_evidence": [],
+            "remediation_playbook": [],
+            "inference_time_ms": None,
+        }
 
 if __name__ == "__main__":
-    engine = LLMRCANarrationEngine()
+    engine = RCANarrationDesignMock()
     dummy_seq = [
         "auth_service IP <IP> User guest login failed invalid password",
         "auth_service IP <IP> User guest login failed invalid password",

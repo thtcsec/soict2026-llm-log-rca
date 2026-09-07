@@ -1,0 +1,49 @@
+{
+  "audit_status": "read-only audit completed before FortiGate I/O prohibition; do not regenerate automatically",
+  "persisted_corpus": {
+    "lines": 1000000,
+    "streamed_text_bytes": 368940230,
+    "days": 5,
+    "lines_per_day": 200000,
+    "per_file_cap": 40000,
+    "files_used": 64,
+    "vocab_size_including_pad_and_mask": 1552,
+    "line_proxy_anomaly_rate": 0.079609
+  },
+  "source_lines": {
+    "careerhub": 485973,
+    "aca": 260919,
+    "courses": 240667,
+    "portal": 3050,
+    "fortigate": 9391,
+    "thuvien": 0,
+    "www": 0
+  },
+  "source_streamed_text_bytes": {
+    "careerhub": 162244997,
+    "aca": 97215289,
+    "courses": 100108261,
+    "portal": 1004713,
+    "fortigate": 8366970
+  },
+  "raw_line_hash_overlap": {
+    "train_unique": 605373,
+    "validation_unique": 95956,
+    "test_unique": 74055,
+    "train_validation_shared": 34770,
+    "train_validation_pct_of_validation_unique": 36.235,
+    "train_test_shared": 13,
+    "train_test_pct_of_test_unique": 0.0176,
+    "validation_test_shared": 8429,
+    "validation_test_pct_of_test_unique": 11.382
+  },
+  "exact_sequence_overlap": {
+    "train_unique": 41785,
+    "validation_unique": 4351,
+    "test_unique": 7573,
+    "train_validation_shared": 71,
+    "train_test_shared": 13,
+    "validation_test_shared": 112
+  },
+  "interpretation": "The persisted split is ordered by backup stream position, not event timestamp, and is not leakage-free. Labels are heuristic proxies, not human ground truth."
+}

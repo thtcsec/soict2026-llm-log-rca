@@ -1,50 +1,26 @@
 [
   {
-    "name": "HUFLIT Campus Logs",
-    "size": "19.28 GB",
-    "lines": 14850220,
-    "vocab_size": 1842,
-    "seq_len": 20,
-    "prec": 0.9482,
-    "rec": 0.9561,
-    "f1": 0.9521,
-    "auc": 0.9784,
-    "latency_ms": 0.0128
+    "name": "DEPRECATED pre-fix HUFLIT result — not paper evidence",
+    "source": "D:\\tu_projects\\LatexProject\\soict2026\\results\\tables\\huflit_hardened_results.json",
+    "lines": 1000000,
+    "prec": 0.7847,
+    "rec": 0.2526,
+    "f1": 0.3612,
+    "auc": 0.7742,
+    "auprc": 0.8716,
+    "latency_ms": 0.1193,
+    "status": "deprecated: masking input was not replaced; use huflit_baselines.json"
   },
   {
-    "name": "BGL Supercomputer",
-    "size": "744 MB",
-    "lines": 4747963,
-    "vocab_size": 1420,
-    "seq_len": 20,
-    "prec": 0.932,
-    "rec": 0.945,
-    "f1": 0.9384,
-    "auc": 0.962,
-    "latency_ms": 0.0142
+    "name": "BGL",
+    "status": "deferred"
   },
   {
-    "name": "HDFS Cluster",
-    "size": "1.58 GB",
-    "lines": 11175629,
-    "vocab_size": 1580,
-    "seq_len": 20,
-    "prec": 0.941,
-    "rec": 0.952,
-    "f1": 0.9465,
-    "auc": 0.971,
-    "latency_ms": 0.0135
+    "name": "HDFS",
+    "status": "deferred"
   },
   {
-    "name": "UNSW-NB15 Intrusion",
-    "size": "100 MB",
-    "lines": 254004,
-    "vocab_size": 420,
-    "seq_len": 20,
-    "prec": 0.961,
-    "rec": 0.968,
-    "f1": 0.9645,
-    "auc": 0.984,
-    "latency_ms": 0.0098
+    "name": "UNSW-NB15",
+    "status": "deferred"
   }
 ]

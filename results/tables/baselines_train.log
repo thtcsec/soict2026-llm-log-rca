@@ -1,0 +1,190 @@
+========================================================================
+ HUFLIT BASELINES — device=cpu
+========================================================================
+ vocab=1552 seq_len=20 train=79999 val=9999 test=9999 test_anom=80.5%
+
+### PCA (Count Vectors)
+    seed=42 F1=0.0000 AUC=0.7366 P=0.0000 R=0.0000
+    seed=101 F1=0.0000 AUC=0.7423 P=0.0000 R=0.0000
+    seed=202 F1=0.0000 AUC=0.7392 P=0.0000 R=0.0000
+    seed=303 F1=0.0000 AUC=0.7401 P=0.0000 R=0.0000
+    seed=404 F1=0.0000 AUC=0.7314 P=0.0000 R=0.0000
+
+### DeepLog (LSTM)
+    [DeepLog (LSTM)] seed=42
+      ep 1/6 loss=2.1498
+      ep 2/6 loss=0.9010
+      ep 3/6 loss=0.7493
+      ep 4/6 loss=0.6893
+      ep 5/6 loss=0.6564
+      ep 6/6 loss=0.6361
+      F1=0.0022 AUC=0.7803 P=0.3913 R=0.0011 lat=0.0986ms
+    [DeepLog (LSTM)] seed=101
+      ep 1/6 loss=2.0900
+      ep 2/6 loss=0.8834
+      ep 3/6 loss=0.7431
+      ep 4/6 loss=0.6844
+      ep 5/6 loss=0.6534
+      ep 6/6 loss=0.6342
+      F1=0.0499 AUC=0.7923 P=0.7148 R=0.0259 lat=0.0936ms
+    [DeepLog (LSTM)] seed=202
+      ep 1/6 loss=2.1633
+      ep 2/6 loss=0.9067
+      ep 3/6 loss=0.7527
+      ep 4/6 loss=0.6918
+      ep 5/6 loss=0.6588
+      ep 6/6 loss=0.6389
+      F1=0.0000 AUC=0.7517 P=0.0000 R=0.0000 lat=0.0947ms
+    [DeepLog (LSTM)] seed=303
+      ep 1/6 loss=2.1386
+      ep 2/6 loss=0.8996
+      ep 3/6 loss=0.7456
+      ep 4/6 loss=0.6858
+      ep 5/6 loss=0.6545
+      ep 6/6 loss=0.6356
+      F1=0.0027 AUC=0.7744 P=0.1930 R=0.0014 lat=0.0963ms
+    [DeepLog (LSTM)] seed=404
+      ep 1/6 loss=2.1378
+      ep 2/6 loss=0.8801
+      ep 3/6 loss=0.7415
+      ep 4/6 loss=0.6844
+      ep 5/6 loss=0.6538
+      ep 6/6 loss=0.6345
+      F1=0.0000 AUC=0.8053 P=0.0000 R=0.0000 lat=0.0920ms
+
+### LogAnomaly-lite (Emb+LSTM)
+    [LogAnomaly-lite (Emb+LSTM)] seed=42
+      ep 1/6 loss=1.8933
+      ep 2/6 loss=0.3830
+      ep 3/6 loss=0.1688
+      ep 4/6 loss=0.0912
+      ep 5/6 loss=0.0560
+      ep 6/6 loss=0.0377
+      F1=0.0308 AUC=0.7388 P=0.3957 R=0.0160 lat=0.0841ms
+    [LogAnomaly-lite (Emb+LSTM)] seed=101
+      ep 1/6 loss=1.8130
+      ep 2/6 loss=0.3466
+      ep 3/6 loss=0.1523
+      ep 4/6 loss=0.0825
+      ep 5/6 loss=0.0512
+      ep 6/6 loss=0.0347
+      F1=0.0144 AUC=0.8016 P=0.4275 R=0.0073 lat=0.0884ms
+    [LogAnomaly-lite (Emb+LSTM)] seed=202
+      ep 1/6 loss=1.8825
+      ep 2/6 loss=0.3695
+      ep 3/6 loss=0.1647
+      ep 4/6 loss=0.0898
+      ep 5/6 loss=0.0553
+      ep 6/6 loss=0.0373
+      F1=0.0000 AUC=0.7429 P=0.0000 R=0.0000 lat=0.0916ms
+    [LogAnomaly-lite (Emb+LSTM)] seed=303
+      ep 1/6 loss=1.8445
+      ep 2/6 loss=0.3547
+      ep 3/6 loss=0.1553
+      ep 4/6 loss=0.0837
+      ep 5/6 loss=0.0520
+      ep 6/6 loss=0.0351
+      F1=0.0057 AUC=0.7589 P=0.2949 R=0.0029 lat=0.0745ms
+    [LogAnomaly-lite (Emb+LSTM)] seed=404
+      ep 1/6 loss=1.8310
+      ep 2/6 loss=0.3195
+      ep 3/6 loss=0.1390
+      ep 4/6 loss=0.0759
+      ep 5/6 loss=0.0477
+      ep 6/6 loss=0.0328
+      F1=0.0015 AUC=0.8435 P=0.2400 R=0.0007 lat=0.0975ms
+
+### Transformer AE (No TCN)
+    [Transformer AE (No TCN)] seed=42
+      ep 1/6 loss=0.5935
+      ep 2/6 loss=0.0387
+      ep 3/6 loss=0.0158
+      ep 4/6 loss=0.0084
+      ep 5/6 loss=0.0051
+      ep 6/6 loss=0.0031
+      F1=0.8059 AUC=0.7788 P=0.9544 R=0.6974 lat=0.1140ms
+    [Transformer AE (No TCN)] seed=101
+      ep 1/6 loss=0.5631
+      ep 2/6 loss=0.0370
+      ep 3/6 loss=0.0152
+      ep 4/6 loss=0.0082
+      ep 5/6 loss=0.0049
+      ep 6/6 loss=0.0030
+      F1=0.0528 AUC=0.7467 P=0.4330 R=0.0281 lat=0.1077ms
+    [Transformer AE (No TCN)] seed=202
+      ep 1/6 loss=0.5684
+      ep 2/6 loss=0.0369
+      ep 3/6 loss=0.0152
+      ep 4/6 loss=0.0080
+      ep 5/6 loss=0.0047
+      ep 6/6 loss=0.0029
+      F1=0.7983 AUC=0.8157 P=0.9396 R=0.6939 lat=0.1074ms
+    [Transformer AE (No TCN)] seed=303
+      ep 1/6 loss=0.5704
+      ep 2/6 loss=0.0375
+      ep 3/6 loss=0.0153
+      ep 4/6 loss=0.0080
+      ep 5/6 loss=0.0047
+      ep 6/6 loss=0.0029
+      F1=0.5875 AUC=0.7566 P=0.9135 R=0.4330 lat=0.1129ms
+    [Transformer AE (No TCN)] seed=404
+      ep 1/6 loss=0.5547
+      ep 2/6 loss=0.0367
+      ep 3/6 loss=0.0152
+      ep 4/6 loss=0.0081
+      ep 5/6 loss=0.0048
+      ep 6/6 loss=0.0029
+      F1=0.0613 AUC=0.7443 P=0.4439 R=0.0329 lat=0.0878ms
+
+### Proposed Masked TCN-Transformer
+    [Proposed Masked TCN-Transformer] seed=42
+      ep 1/6 loss=0.6738
+      ep 2/6 loss=0.0817
+      ep 3/6 loss=0.0391
+      ep 4/6 loss=0.0227
+      ep 5/6 loss=0.0154
+      ep 6/6 loss=0.0118
+      F1=0.6612 AUC=0.7363 P=0.9112 R=0.5189 lat=0.0979ms
+    [Proposed Masked TCN-Transformer] seed=101
+      ep 1/6 loss=0.6993
+      ep 2/6 loss=0.0862
+      ep 3/6 loss=0.0409
+      ep 4/6 loss=0.0227
+      ep 5/6 loss=0.0169
+      ep 6/6 loss=0.0119
+      F1=0.7326 AUC=0.8093 P=0.9639 R=0.5909 lat=0.1027ms
+    [Proposed Masked TCN-Transformer] seed=202
+      ep 1/6 loss=0.6982
+      ep 2/6 loss=0.0838
+      ep 3/6 loss=0.0398
+      ep 4/6 loss=0.0227
+      ep 5/6 loss=0.0157
+      ep 6/6 loss=0.0119
+      F1=0.0864 AUC=0.7298 P=0.5087 R=0.0472 lat=0.1183ms
+    [Proposed Masked TCN-Transformer] seed=303
+      ep 1/6 loss=0.6882
+      ep 2/6 loss=0.0799
+      ep 3/6 loss=0.0395
+      ep 4/6 loss=0.0225
+      ep 5/6 loss=0.0154
+      ep 6/6 loss=0.0122
+      F1=0.0379 AUC=0.7405 P=0.4517 R=0.0198 lat=0.1059ms
+    [Proposed Masked TCN-Transformer] seed=404
+      ep 1/6 loss=0.6816
+      ep 2/6 loss=0.0783
+      ep 3/6 loss=0.0397
+      ep 4/6 loss=0.0230
+      ep 5/6 loss=0.0168
+      ep 6/6 loss=0.0114
+      F1=0.7922 AUC=0.8177 P=0.9664 R=0.6713 lat=0.0891ms
+
+========================================================================================
+Model                                |         F1 |        AUC |          P |          R |       ms
+----------------------------------------------------------------------------------------
+PCA (Count Vectors)                  | 0.0000±0.000 | 0.7379±0.004 | 0.0000±0.000 | 0.0000±0.000 |  0.0095
+DeepLog (LSTM)                       | 0.0110±0.022 | 0.7808±0.020 | 0.2598±0.302 | 0.0057±0.011 |  0.0950
+LogAnomaly-lite (Emb+LSTM)           | 0.0105±0.013 | 0.7772±0.045 | 0.2716±0.170 | 0.0054±0.007 |  0.0872
+Transformer AE (No TCN)              | 0.4611±0.379 | 0.7684±0.030 | 0.7369±0.273 | 0.3771±0.334 |  0.1060
+Proposed Masked TCN-Transformer      | 0.4621±0.368 | 0.7667±0.043 | 0.7604±0.257 | 0.3696±0.312 |  0.1028
+========================================================================================
+[+] Saved D:\tu_projects\LatexProject\soict2026\results\tables\huflit_baselines.json

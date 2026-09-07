@@ -4,7 +4,7 @@ data_preprocessor.py
 SOICT 2026 — Stage 0: Raw Log Ingestion & Dataset Preprocessing
 
 Handles:
-  - HUFLIT 19.28 GB campus logs (raw syslog / firewall / web telemetry)
+  - Legacy multi-dataset preprocessing prototype; not the source of paper metrics
   - BGL, HDFS (public loghub benchmarks)
   - UNSW-NB15, ToN_IoT (network intrusion datasets)
 
@@ -25,7 +25,7 @@ import numpy as np
 from pathlib import Path
 from collections import defaultdict
 
-# ─── Drain3 Simple Parser ─────────────────────────────────────────────────────
+# ─── Custom similarity parser (not Drain3) ───────────────────────────────────
 
 class DrainParser:
     """
@@ -159,7 +159,7 @@ def main():
 
     all_log_files = [f for f in root.rglob('*') if f.is_file() and f.suffix.lower() not in ('.zip', '.rar', '.gitkeep')]
     print(f"==========================================================================")
-    print(f" SOICT 2026: Preprocessing HUFLIT 19.28 GB Campus Log Dataset")
+    print(" LEGACY PROTOTYPE: output is not paper evidence")
     print(f"==========================================================================")
     print(f" Total Log Files Available: {len(all_log_files)}")
     

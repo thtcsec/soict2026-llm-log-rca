@@ -1,20 +1,12 @@
 {
-  "dataset": "HUFLIT Campus Logs 19.28GB",
-  "total_test_sequences": 10000,
-  "precision": 0.0,
-  "recall": 0.0,
-  "f1_score": 0.0,
-  "roc_auc": 0.7935895723413254,
-  "latency_ms_per_seq": 0.13155126571655273,
-  "sample_rca": {
-    "severity": "CRITICAL",
-    "root_cause_summary": "High-density Credential Stuffing / Brute-Force Authentication Attack detected targeting Campus Active Directory.",
-    "technical_explanation": "A sequence of 45 consecutive failed login attempts originating from untrusted VLAN range within 3.2 seconds. Indicates automated password dictionary attack aiming at credential harvest.",
-    "remediation_playbook": [
-      "Isolate source IP/MAC via OpenFlow flow_mod drop rule on Core Switch.",
-      "Enforce 15-minute account lockout on targeted LDAP accounts.",
-      "Trigger automated 2FA re-authentication prompt for affected user sessions."
-    ],
-    "inference_time_ms": 125.0
-  }
+  "status": "DEPRECATED: see huflit_baselines.json after corrected masked-model rerun",
+  "dataset": "HUFLIT Campus Logs (selective Thang6 stream)",
+  "total_test_sequences": 9999,
+  "precision": 0.7846540455504126,
+  "recall": 0.25259756400696,
+  "f1_score": 0.36116597962464114,
+  "roc_auc": 0.7742084142651847,
+  "auprc": 0.871550981296933,
+  "latency_ms_per_seq": 0.1192836203617836,
+  "source": "D:\\tu_projects\\LatexProject\\soict2026\\results\\tables\\huflit_hardened_results.json"
 }

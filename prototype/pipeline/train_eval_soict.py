@@ -131,10 +131,10 @@ def run_pipeline():
     # 5. Save Results to CSV & Table File
     results_dir = Path("results/tables")
     results_dir.mkdir(parents=True, exist_ok=True)
-    res_path = results_dir / "evaluation_summary.json"
+    res_path = results_dir / "legacy_evaluation_summary.json"
     
     summary_data = {
-        "dataset": "HUFLIT Campus Logs 19.28GB",
+        "dataset": "LEGACY prototype output — not paper evidence",
         "total_test_sequences": int(len(X_test)),
         "precision": float(prec),
         "recall": float(rec),

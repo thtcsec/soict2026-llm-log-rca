@@ -2,11 +2,22 @@
 
 This directory stores **raw, unprocessed log files** from HUFLIT campus infrastructure and public benchmarks.
 
+## HUFLIT campus logs (moved, junction)
+
+Canonical selective extract (reuse across projects):
+
+`D:\huflit-campus-logs` ← junction target of `data/raw/huflit_logs`
+
+Source RAR (do **not** full-extract):
+`D:\huflit_logs\Thang6__CANH_BAO_giai_nen_tang_IO_disk_rat_lon.rar` (~21 GB uncompressed).
+Raw ingestion is not part of the normal run. The ingestion script excludes all
+FortiGate members by default and also skips members over 500 MiB.
+
 ## Expected Files (NOT committed to Git — see .gitignore)
 
 | File | Source | Size | Format |
 |---|---|---|---|
-| `huflit_campus_raw.log` | HUFLIT Internal (from ThS. Cao Tiến Thành) | ~5 GB | Syslog plaintext |
+| `huflit_logs/` | HUFLIT Internal (from ThS. Cao Tiến Thành) | ~32 GB extracted + zips | FortiGate / web / SSH |
 | `BGL.log.gz` | [Loghub](https://github.com/logpai/loghub) | ~744 MB | Syslog gzip |
 | `HDFS_1.log` | [Loghub](https://github.com/logpai/loghub) | ~1.58 GB | HDFS plaintext |
 
@@ -35,4 +46,4 @@ wget https://research.unsw.edu.au/projects/toniot-datasets
 | **ToN_IoT** | IoT & IIoT heterogeneous logs | 9 cyber threats |
 | **BoT-IoT** | IoT botnet traffic | DDoS, DoS, Recon, Theft |
 
-Place all files here before running `python prototype/drain3/log_parser.py`.
+Public datasets listed here are deferred and are not needed for the current paper results.

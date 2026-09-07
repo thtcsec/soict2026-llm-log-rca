@@ -2,17 +2,16 @@
 set -e
 
 echo "=========================================================================="
-echo " SOICT 2026: LLM-Augmented Log Anomaly Detection & RCA Master Pipeline"
+echo " SOICT 2026: safe processed-array verification (no raw/FortiGate ingest)"
 echo "=========================================================================="
 
-echo "[1/4] Running Drain3 Log Parsing Demonstration..."
-python prototype/drain3/log_parser.py
-
-echo "[2/4] Testing Hybrid TCN-Transformer Autoencoder Model..."
+echo "[1/3] Testing masked TCN-Transformer implementation..."
 python prototype/pipeline/tcn_transformer.py
 
-echo "[3/4] Generating Foundation Model RCA Narration Sample..."
+echo "[2/3] Showing the RCA design-only schema..."
 python prototype/llm/rca_narration.py
 
-echo "[4/4] Pipeline Check Complete! Output logs saved."
+echo "[3/3] To rerun measured baselines from existing .npy arrays:"
+echo "python prototype/pipeline/run_baselines_huflit.py --threads 2"
+echo "Raw ingest is intentionally not run. FortiGate is excluded by default there."
 echo "=========================================================================="

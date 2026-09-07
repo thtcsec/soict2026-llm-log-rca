@@ -355,7 +355,7 @@ def main():
     # 1. HUFLIT
     hd = Path("data/processed/huflit")
     if (hd / "train_sequences.npy").exists():
-        print("\n[1/4] HUFLIT Campus Logs (REAL — 19.28 GB source)")
+        print("\n[1/4] LEGACY HUFLIT benchmark (not used as paper evidence)")
         X_h = np.vstack([np.load(hd/"train_sequences.npy"),
                          np.load(hd/"test_sequences.npy")])
         y_h = np.hstack([np.load(hd/"train_labels.npy"),
@@ -432,4 +432,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(
+        "Retired harness: it mixes real HUFLIT arrays with synthetic public-benchmark data. "
+        "Use run_baselines_huflit.py for paper evidence."
+    )

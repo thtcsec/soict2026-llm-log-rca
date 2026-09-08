@@ -1,14 +1,12 @@
 # Result provenance
 
-`huflit_baselines.json` is the only detector-results file used by the current
-manuscript and measured figures. Masked models in it must be produced by the
-corrected token-replacement objective and leave-one-position-out scoring.
+## Canonical for the revised Full Paper
+- `huflit_v2_split_meta.json` — dedup + source/member-bounded windows + day split
+- `huflit_v2_baselines.json` — PCA / masked Transformer / TCN–Transformer + trivial baselines + threshold sweeps
 
-`huflit_hardened_results.json`, `evaluation_summary.json`, and
-`real_multidataset_benchmark.json` are retained only as deprecated historical
-outputs. They must not be cited: the first two used a loss mask without replacing
-input tokens, and the multi-dataset file belongs to an earlier, non-comparable
-harness.
+## Protocol A (leaky archive split; comparison only)
+- `huflit_baselines.json` — stream-position 80/10/10; high test prevalence; duplicate leakage
 
-The persisted HUFLIT arrays use heuristic proxy labels and a stream-position
-split. Repeated records across backup archives mean the split is not leakage-free.
+## Deprecated
+- `huflit_hardened_results.json`, `evaluation_summary.json`, `real_multidataset_benchmark.json`
+  must not be cited as primary evidence.

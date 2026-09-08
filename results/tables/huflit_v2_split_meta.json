@@ -1,0 +1,74 @@
+{
+  "experiment": "huflit_v2_dedup_source_bounded_day_split",
+  "window_label_definition": "window positive iff any of L proxy line labels is positive (OR aggregation)",
+  "split": {
+    "train_days": [
+      "15062026",
+      "16062026",
+      "17062026"
+    ],
+    "val_days": [
+      "18062026"
+    ],
+    "test_days": [
+      "19062026"
+    ],
+    "note": "Day folders are backup collection periods, not verified per-event timestamps."
+  },
+  "window": 20,
+  "step": 10,
+  "stream_meta": {
+    "raw_lines_scanned_nonempty": 1262211,
+    "unique_kept": 1000000,
+    "duplicates_skipped": 262194,
+    "dup_rate_among_scanned": 0.2077259665776958,
+    "lines_per_day": {
+      "15062026": 200000,
+      "16062026": 200000,
+      "17062026": 200000,
+      "18062026": 200000,
+      "19062026": 200000
+    },
+    "lines_per_source": {
+      "aca": 275070,
+      "careerhub": 508730,
+      "courses": 216200
+    }
+  },
+  "line_anomaly_rate_kept": 0.076264,
+  "partition_sizes": {
+    "train": {
+      "n": 59966,
+      "anomaly_rate": 0.3941066604409165,
+      "implied_always_anomaly_f1": 0.5653895381523703
+    },
+    "val": {
+      "n": 19988,
+      "anomaly_rate": 0.3232939763858315,
+      "implied_always_anomaly_f1": 0.4886200378071834
+    },
+    "test": {
+      "n": 19990,
+      "anomaly_rate": 0.563631815907954,
+      "implied_always_anomaly_f1": 0.7209265124612086
+    }
+  },
+  "window_hash_overlap": {
+    "train_val_shared_windows": 505,
+    "train_test_shared_windows": 110,
+    "val_test_shared_windows": 225,
+    "train_unique_windows": 32399,
+    "val_unique_windows": 11065,
+    "test_unique_windows": 11137
+  },
+  "group_stats_summary": {
+    "n_groups": 46,
+    "by_source_windows": {
+      "aca": 27489,
+      "careerhub": 50843,
+      "courses": 21612
+    }
+  },
+  "vocab_size": 1183,
+  "fortigate_policy": "skip fortigate.csv and members > max_member_mb; no full RAR expand"
+}

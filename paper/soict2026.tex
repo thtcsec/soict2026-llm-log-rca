@@ -24,9 +24,9 @@
 
 \titlerunning{Proxy-Label Campus Log Detection: Validity Limits}
 
-\author{Thanh Tien Cao\inst{1}\thanks{Corresponding author: \email{thanhct@huflit.edu.vn}} \and
-Tu Hoang Trinh\inst{1} \and
-Ha Manh Tran\inst{1}}
+\author{Tien Thanh Cao\inst{1}\thanks{Corresponding author: \email{thanhct@huflit.edu.vn}} \and
+Hoang Tu Trinh\inst{1} \and
+Manh Ha Tran\inst{1}}
 
 \authorrunning{T.~T.~Cao et al.}
 
@@ -39,7 +39,7 @@ Ho Chi Minh City, Vietnam\\
 \thispagestyle{empty}
 
 \begin{abstract}
-Campus log anomaly studies often treat archive order as time and window OR-aggregation as a label. We measure how those choices distort conclusions on a selective HUFLIT stream ($1{,}000{,}000$ deduplicated lines; custom similarity parser; HTTP/keyword \emph{proxy} labels). On a leaky stream-position split, test-window prevalence reaches $80.5\%$ because a window is positive if any of $L{=}20$ lines is positive; an always-anomaly classifier then obtains F1$\approx0.892$, while a masked TCN--Transformer under $\tau=\mu{+}3\sigma$ scores only $0.0395\pm0.0163$ F1 despite ROC-AUC $0.7226\pm0.0178$ (AUPRC lift over prevalence $\approx{+}0.031$). After global line-hash deduplication, source/member-bounded windows, and a day-held-out split (train 15--17~Jun, val 18~Jun, test 19~Jun 2026), test prevalence falls to $56.4\%$ (always-anomaly F1 $0.721$), yet masked models collapse to near-chance ranking (TCN--Transformer ROC-AUC $0.5315\pm0.112$; no-TCN $0.4933\pm0.009$), while PCA retains a modest AUPRC lift ($+0.098$). Threshold sweeps show $\mu{+}3\sigma$ suppresses recall; looser rules inflate F1 toward the trivial baseline. The TCN adds latency (batch-1 $51.1$ vs.\ $18.5$~ms) without a consistent accuracy benefit. Local LLM RCA is left to future work.
+Campus log anomaly studies often treat archive order as time and window OR-aggregation as a label. We measure how those choices distort conclusions on a selective HUFLIT stream ($1{,}000{,}000$ deduplicated lines; custom similarity parser; HTTP/keyword \emph{proxy} labels). On a leaky stream-position split, test-window prevalence reaches $80.5\%$ because a window is positive if any of $L{=}20$ lines is positive; an always-anomaly classifier then obtains F1$\approx0.892$, while a masked TCN--Transformer under $\tau=\mu{+}3\sigma$ scores only $0.0395\pm0.0163$ F1 despite ROC-AUC $0.7226\pm0.0178$ (AUPRC lift over prevalence $\approx{+}0.031$). After global line-hash deduplication, source/member-bounded windows, and a day-held-out split (train 15--17~Jun, val 18~Jun, test 19~Jun 2026), test prevalence falls to $56.4\%$ (always-anomaly F1 baseline $0.721$), yet masked models collapse to near-chance ranking (TCN--Transformer ROC-AUC $0.5315\pm0.112$; no-TCN $0.4933\pm0.009$), while PCA retains a modest AUPRC lift ($+0.098$). Threshold sweeps show $\mu{+}3\sigma$ suppresses recall; looser rules inflate F1 toward the high-prevalence trivial baseline. The TCN adds latency (batch-1 $51.1$ vs.\ $18.5$~ms) without a consistent accuracy benefit. Local LLM RCA is left to future work.
 \keywords{AIOps \and Log Anomaly Detection \and Proxy Labels \and Experimental Validity \and TCN--Transformer \and Campus Infrastructure.}
 \end{abstract}
 
@@ -50,7 +50,7 @@ This paper treats those validity threats as first-class experimental objects. We
 
 The contributions are:
 \begin{itemize}
-    \item \textbf{Validity protocol}: quantify how OR window labels and archive-order splits inflate prevalence and F1 ceilings; release dual-split artifacts (\texttt{huflit\_baselines.json}, \texttt{huflit\_v2\_*}).
+    \item \textbf{Validity protocol}: quantify how OR window labels and archive-order splits inflate prevalence and inflate apparent F1 relative to an always-anomaly trivial baseline; retain dual-split evaluation artifacts (\texttt{huflit\_baselines.json}, \texttt{huflit\_v2\_*}).
     \item \textbf{Dedup + day split}: global SHA-1 line dedup, windows that never cross (day, source, member), train/val/test by backup day.
     \item \textbf{Threshold-aware reading}: $\mu{+}k\sigma$ and percentile sweeps plus a validation-oracle diagnostic, separating ranking from calibration.
     \item \textbf{Negative TCN evidence}: on both protocols the TCN does not consistently beat a masked Transformer without TCN, while increasing leave-one-out scoring latency.
@@ -59,7 +59,7 @@ The contributions are:
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig1_architecture.png}
-\caption{Architectural overview of the measured detector (parsing + masked PLL scoring). Local LLM RCA is deferred.}
+\caption{Measured detector pipeline: streaming parsing and masked PLL scoring. Local LLM RCA is out of scope.}
 \label{fig_arch}
 \end{figure*}
 
@@ -68,13 +68,13 @@ The contributions are:
 Log parsing transforms free-form messages into event templates by separating constants from dynamic parameters~\cite{ref_drain3,ref_spell}. Drain uses a fixed-depth parse tree~\cite{ref_drain3}; Spell uses streaming sequence matching~\cite{ref_spell}. Our artifact does \emph{not} implement Drain or Drain3. It applies regex masking and a linear scan over equal-length templates, merging tokens when positional similarity exceeds $0.5$. We call this the \emph{custom similarity parser} and avoid attributing Drain3 properties or throughput to it.
 
 \subsection{Deep Learning for Log Anomaly Detection}
-Sequence-based anomaly detection models learn temporal transition dynamics over sequences of log templates~\cite{ref_deeplog,ref_loganomaly}. Du et al.~\cite{ref_deeplog} introduced DeepLog, employing Long Short-Term Memory (LSTM) networks to model normal log sequences and flag unexpected subsequent templates as anomalous. Meng et al.~\cite{ref_loganomaly} proposed LogAnomaly, integrating semantic template vectors via FastText to capture semantic similarities. SwissLog~\cite{ref_swisslog} and LogRobust~\cite{ref_logrobust} further address log instability and interleaved execution threads. While deep sequence architectures achieve strong detection precision, they operate as black-box scoring engines: scalar anomaly metrics fail to explain the operational root cause, imposing heavy manual triage overhead on operators.
+Sequence-based anomaly detection models learn temporal transition dynamics over sequences of log templates~\cite{ref_deeplog,ref_loganomaly,ref_pca}. Du et al.~\cite{ref_deeplog} introduced DeepLog (LSTM next-token prediction). Meng et al.~\cite{ref_loganomaly} proposed LogAnomaly with semantic template vectors. SwissLog~\cite{ref_swisslog} and LogRobust~\cite{ref_logrobust} address instability and interleaved threads. Classical reconstruction baselines such as PCA on count vectors remain competitive on some structured logs~\cite{ref_pca}. Recent Transformer--TCN hybrids~\cite{ref_tranconvad}, multi-scale semantic models~\cite{ref_logmuse_2026}, and contrastive masked objectives~\cite{ref_contralog_2026} continue this line. Public corpora such as Loghub~\cite{ref_loghub} remain the standard sanity setting; we defer a full HDFS/BGL re-run under the present harness to future work.
 
-\subsection{Large Language Models in Log Analytics and RCA}
-Recent work includes Transformer--TCN detection~\cite{ref_tranconvad}, masked/contrastive log models~\cite{ref_contralog_2026}, and LLM-assisted detectors such as KRONE~\cite{ref_krone_2026}, MaidLog~\cite{ref_maidlog_2026}, CoLA~\cite{ref_cola_2025}, and Smart Eye~\cite{ref_smarteye_2026}. LLM4Log~\cite{ref_llm4log_survey} surveys the area; cloud RCA recommenders are studied in~\cite{ref_llm_rca,ref_rca_survey}. Our focus is experimental validity on campus archives rather than a new LLM narrator.
+\subsection{LLMs for Log Analytics}
+LLM-assisted detectors include KRONE~\cite{ref_krone_2026}, MaidLog~\cite{ref_maidlog_2026}, CoLA~\cite{ref_cola_2025}, and Smart Eye~\cite{ref_smarteye_2026}. LLM4Log~\cite{ref_llm4log_survey} surveys the area; cloud RCA recommenders are studied in~\cite{ref_llm_rca,ref_rca_survey}. Our focus is experimental validity on campus archives rather than a new LLM narrator.
 
 \begin{table}[htbp]
-\caption{Qualitative comparison of related systems (capabilities as published). Latency is \emph{not} cross-comparable: this work reports batch-1 leave-one-out PLL wall time; DeepLog/LogAnomaly-lite rows use legacy batched scoring (NR for true batch-1).}
+\caption{Qualitative comparison of related systems. Latency is \emph{not} cross-comparable: this work reports batch-1 leave-one-out PLL; DeepLog/LogAnomaly-lite legacy batched scoring is NR for batch-1.}
 \label{tab_related_comparison}
 \centering
 \setlength{\tabcolsep}{4.0pt}
@@ -102,78 +102,80 @@ KRONE~\cite{ref_krone_2026} & LLM hierarchy & Hybrid+LLM & Nested LLM & Cloud/AP
 The measured system has two stages:
 (i) \textbf{Parsing}: selected syslog messages are tokenized by the custom similarity parser;
 (ii) \textbf{Masked sequence scoring}: sliding template windows are corrupted by true token replacement, encoded by an optional causal TCN plus Transformer, and scored by leave-one-position-out pseudo-log-likelihood (PLL).
-Local LLM+RAG narration is \emph{out of scope} for this revision (Future Work).
+Local LLM+RAG narration is \emph{out of scope} (Future Work).
 
 \subsection{Masked TCN-Transformer Denoising Sequence Model}
 We formulate the detector as a masked template language model: 15\% of input tokens are replaced by a reserved mask token, representations pass through a Temporal Convolutional Network (TCN)~\cite{ref_tcn} and Transformer self-attention~\cite{ref_attention}, and a linear vocabulary head predicts the original identities only at selected positions.
 
 \subsubsection{Embedding and Dynamic Masking}
-A sliding window of length $L = 20$ with stride $S = 10$ (as used in the measured HUFLIT runs) extracts template sequences $\mathbf{X} = [T_1, T_2, \ldots, T_L]$. During training, 15\% of the template tokens are randomly replaced with a reserved \texttt{[MASK]} token ($ID = |\mathcal{V}|+1$), distinguishing masked positions from sequence padding ($ID = 0$). Padding masks are applied across self-attention layers to prevent padded positions from corrupting contextual representations. Input tokens are embedded into a $d_{\text{model}}$-dimensional continuous vector space:
+A sliding window of length $L = 20$ with stride $S = 10$ extracts template sequences $\mathbf{X} = [T_1, T_2, \ldots, T_L]$. During training, 15\% of tokens are replaced with \texttt{[MASK]} ($ID = |\mathcal{V}|+1$), distinct from padding ($ID = 0$). Padding masks are applied in self-attention. Embeddings use sinusoidal positional encodings~\cite{ref_attention}:
 \begin{equation}
     \mathbf{E} = \text{Embedding}(\mathbf{X}) + \mathbf{P}_{\text{pos}} \in \mathbb{R}^{L \times d_{\text{model}}}
 \end{equation}
-where $\mathbf{P}_{\text{pos}}$ denotes sinusoidal positional encodings~\cite{ref_attention}:
-\begin{equation}
-    \mathbf{P}_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right), \quad \mathbf{P}_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)
-\end{equation}
 
 \subsubsection{Temporal Convolutional Network (TCN) Layer}
-To capture localized temporal patterns across consecutive log events, the embedded sequence $\mathbf{E}$ passes through a stack of 1D dilated causal convolutional layers~\cite{ref_tcn}. For an input sequence $\mathbf{x} \in \mathbb{R}^L$ and a convolutional filter $f: \{0, \ldots, k-1\} \to \mathbb{R}$, the dilated convolution operation with dilation factor $d$ is defined as:
+Dilated causal convolutions~\cite{ref_tcn} with $d \in \{1, 2\}$ extract local patterns without future leakage:
 \begin{equation}
     \mathbf{y}(t) = (\mathbf{x} *_d f)(t) = \sum_{i=0}^{k-1} f(i) \cdot \mathbf{x}(t - d \cdot i)
 \end{equation}
-We configure dilation factors $d \in \{1, 2\}$, enforcing causal convolutions for localized temporal extraction without future feature leakage. Residual connections and layer normalization ensure stable gradient propagation:
 \begin{equation}
     \mathbf{H}_{\text{TCN}} = \text{LayerNorm}(\text{Proj}(\mathbf{E}) + \text{GELU}(\text{CausalTCN}(\mathbf{E})))
 \end{equation}
 
-\subsubsection{Transformer Multi-Head Self-Attention Encoder}
-The output $\mathbf{H}_{\text{TCN}}$ is then fed into a Transformer Encoder block to model long-range inter-template correlations. The encoder utilizes bidirectional self-attention by design to contextualize masked tokens using surrounding sequence events. For queries $\mathbf{Q}$, keys $\mathbf{K}$, and values $\mathbf{V}$:
-\begin{equation}
-    \text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\left(\frac{\mathbf{Q} \mathbf{K}^T}{\sqrt{d_k}}\right) \mathbf{V}
-\end{equation}
-\begin{equation}
-    \text{MHA}(\mathbf{H}) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h) \mathbf{W}^O
-\end{equation}
-\begin{equation}
-    \text{head}_i = \text{Attention}(\mathbf{H} \mathbf{W}_i^Q, \mathbf{H} \mathbf{W}_i^K, \mathbf{H} \mathbf{W}_i^V)
-\end{equation}
-The Transformer block uses pre-layer normalization, residual connections, and a two-layer feed-forward network with GELU activation:
-\begin{equation}
-    \text{FFN}(\mathbf{Z}) = \mathrm{GELU}(\mathbf{Z} \mathbf{W}_1 + \mathbf{b}_1) \mathbf{W}_2 + \mathbf{b}_2
-\end{equation}
-\begin{equation}
-    \mathbf{Z} = \mathbf{H} + \text{MHA}(\text{LayerNorm}(\mathbf{H})), \quad
-    \mathbf{H}_{\text{out}} = \mathbf{Z} + \text{FFN}(\text{LayerNorm}(\mathbf{Z})).
-\end{equation}
-
-\subsubsection{Masked Reconstruction Objective and Anomaly Scoring}
-A linear classification head projects $\mathbf{H}_{\text{out}}$ back to the template vocabulary space $\mathbb{R}^{|\mathcal{V}|}$, serving as the reconstruction decoder. The model is trained to predict original template identities at masked positions via Cross-Entropy loss:
-\begin{equation}
-    \mathcal{L}_{\text{MLM}} = -\frac{1}{|\mathcal{M}|} \sum_{i \in \mathcal{M}} \log P(T_i = t_i \mid \mathbf{X}_{\backslash \mathcal{M}})
-\end{equation}
-During inference, we compute pseudo-log-likelihood by making one forward pass per valid position (batched over sequences), masking only that position and excluding padding ($ID=0$):
+\subsubsection{Transformer Encoder and Scoring}
+A single Transformer encoder layer (pre-LN, multi-head attention, GELU FFN) contextualizes the sequence. Training minimizes masked cross-entropy. Inference uses leave-one-position-out PLL:
 \begin{equation}
     S(\mathbf{X}) = \frac{1}{L_{\text{valid}}} \sum_{t=1}^{L_{\text{valid}}} -\log P(T_t = t_t \mid \mathbf{X}_{\backslash \{t\}})
 \end{equation}
-A validation-calibrated threshold $\tau$ flags anomalous sequences:
-\begin{equation}
-    \tau = \mu_{\text{val}} + 3 \cdot \sigma_{\text{val}}
-\end{equation}
-where $\mu_{\text{val}}$ and $\sigma_{\text{val}}$ are the mean and standard deviation of scores over nominal validation sequences. We additionally report $k\in\{1,2,3\}$, nominal percentiles $\{95,97.5,99\}$, and a validation-oracle F1 threshold as a \emph{diagnostic} upper bound (not a deployable claim).
+The primary threshold is $\tau=\mu_{\mathrm{val}}+3\sigma_{\mathrm{val}}$ on nominal validation scores; we also report $k\in\{1,2,3\}$, percentiles $\{95,97.5,99\}$, and a validation-oracle F1 threshold as a diagnostic only.
 
 \section{Experimental Evaluation}
 \subsection{Corpus and Window Labels}
-We stream selective Thang6 day zips from a local campus extract (\path{D:/huflit-campus-logs}), skipping \texttt{fortigate.csv} and members ${>}500$~MiB (no full RAR expand). Proxy line labels use HTTP $4$xx/$5$xx, deny/block fields, and keywords---not SOC adjudication. A window of length $L{=}20$ (step $10$) is positive iff \emph{any} constituent line is positive (OR aggregation). If line anomaly rate is $p$, then under independence $1-(1-p)^{L}$ approximates window prevalence; with $p{=}0.0796$ this predicts $\approx0.81$, matching the leaky split's $80.5\%$ test prevalence.
+We stream selective Thang6 day zips from a local campus extract (\path{D:/huflit-campus-logs}), skipping \texttt{fortigate.csv} and members ${>}500$~MiB. Proxy line labels use HTTP $4$xx/$5$xx, deny/block fields, and keywords---not SOC adjudication. A window is positive iff \emph{any} of its $L$ lines is positive (OR aggregation). Under independence, $1-(1-p)^{L}$ with $p{=}0.0796$ predicts prevalence $\approx0.81$, matching Protocol~A's $80.5\%$ test rate.
 
 \subsection{Protocol A (leaky archive split)}
-Records are ordered by backup day $\rightarrow$ ZIP $\rightarrow$ member $\rightarrow$ in-member position, then split $80$/$10$/$10$ before windowing. This is \emph{not} event time: windows may cross file/service boundaries, and duplicate backups leak across partitions ($36.235\%$ of unique validation lines also appear in training)~\cite{ref_llm4log_survey}. Results live in \texttt{huflit\_baselines.json}.
+Records are ordered by backup day $\rightarrow$ ZIP $\rightarrow$ member $\rightarrow$ in-member position, then split $80$/$10$/$10$ before windowing. This is \emph{not} event time: windows may cross file/service boundaries. A raw-line hash audit of this split found $36.235\%$ of unique validation lines also in training (and $11.382\%$ validation/test line overlap). Results: \texttt{huflit\_baselines.json}.
 
 \subsection{Protocol B (dedup + source-bounded + day split)}
-We keep the first SHA-1 occurrence of each raw line ($262{,}194$ duplicates skipped while filling $1$M unique lines), emit windows only inside a single (day, source, member) group, and assign days $15$--$17$~Jun$\rightarrow$train, $18$~Jun$\rightarrow$val, $19$~Jun$\rightarrow$test. Day folders remain backup collection periods, not verified per-event timestamps. Sources kept are aca/careerhub/courses. Test-window prevalence drops to $56.36\%$ (always-anomaly F1 $0.721$). Exact window-hash overlap shrinks to $505$ train/val and $110$ train/test shared windows (\texttt{huflit\_v2\_split\_meta.json}).
+We keep the first SHA-1 of each \emph{raw line} ($262{,}194$ duplicates skipped while filling $1$M unique lines), emit windows only inside one (day, source, member) group, and assign days $15$--$17$~Jun$\rightarrow$train, $18$~Jun$\rightarrow$val, $19$~Jun$\rightarrow$test. Day folders are backup collection periods, not verified per-event timestamps. Sources: aca/careerhub/courses. Test-window prevalence is $56.36\%$ (always-anomaly F1 baseline $0.721$).
+
+Raw-line dedup does \emph{not} imply unique template windows: different raw strings can map to the same template-ID sequence, and similar traffic on different days can yield identical windows. We therefore report \textbf{exact template-ID window sequence overlap} (SHA-1 of the integer window vector): $505$ train/val and $110$ train/test shared windows (\texttt{huflit\_v2\_split\_meta.json}).
+
+\subsection{Experimental Setup}
+Table~\ref{tab_setup} lists corpus and model hyperparameters used for Protocol~B (masked models). Protocol~A uses the same architecture on the earlier stream-position arrays (\texttt{data/processed/huflit}). Training is nominal-only; seeds $\{42,101,202,303,404\}$; hardware is CPU (PyTorch $2.8.0$+cpu, 2 intra-op threads).
+
+\begin{table}[htbp]
+\caption{Protocol~B setup (masked models). Window label $=$ OR over $L$ proxy line labels.}
+\label{tab_setup}
+\centering
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.88}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{ll}
+\toprule
+\textbf{Item} & \textbf{Value} \\
+\midrule
+Unique lines kept / dups skipped & $1{,}000{,}000$ / $262{,}194$ \\
+Train / val / test windows & $59{,}966$ / $19{,}988$ / $19{,}990$ \\
+Test positives / prevalence & $11{,}267$ / $56.36\%$ \\
+Always-anomaly F1 baseline (test) & $0.721$ \\
+Vocab (templates$+$pad$+$mask) & $1{,}183$ \\
+$L$, stride, mask ratio & $20$, $10$, $15\%$ \\
+$d_{\mathrm{model}}$, heads, layers, FFN & $128$, $4$, $1$, $256$ \\
+TCN (when used) & causal conv $k{=}3$, dilations $\{1,2\}$ \\
+Optimizer / LR / batch / epochs & Adam / $10^{-3}$ / $256$ / $6$ \\
+Dropout & $0$ (default encoder) \\
+Scoring & leave-one-out PLL \\
+Primary threshold & $\mu_{\mathrm{val}}+3\sigma_{\mathrm{val}}$ on nominal val \\
+Seeds & $42,101,202,303,404$ \\
+Hardware & CPU, 2 PyTorch threads \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
 
 \subsection{Models and Metrics}
-Masked models use true $15\%$ token replacement, nominal-only training, five seeds, and leave-one-out PLL. We report Precision/Recall/F1 at $\mu{+}3\sigma$, ROC-AUC, AUPRC, \textbf{AUPRC lift over prevalence}, always-anomaly F1, and batch-1 PLL latency (CPU, 2 threads). DeepLog/LogAnomaly rows in Protocol~A are retained from the prior same-array suite for ranking context.
+We evaluate PCA count-vector reconstruction~\cite{ref_pca}, a masked Transformer without TCN, and the masked TCN--Transformer. Protocol~A also retains DeepLog/LogAnomaly-lite rows from the same-array suite. Metrics: F1 at $\mu{+}3\sigma$, ROC-AUC, AUPRC, \textbf{AUPRC lift over prevalence}, always-anomaly F1 baseline, and batch-1 PLL latency.
 
 \begin{figure*}[t]
 \centering
@@ -198,7 +200,7 @@ Masked models use true $15\%$ token replacement, nominal-only training, five see
 \end{figure*}
 
 \begin{table}[htbp]
-\caption{Protocol~A (leaky stream-position): $\tau=\mu{+}3\sigma$; test prevalence $80.5\%$; always-anomaly F1$\approx0.892$; AUPRC no-skill$\approx0.805$}
+\caption{Protocol~A (leaky stream-position): $\tau=\mu{+}3\sigma$; test prevalence $80.5\%$; always-anomaly F1 baseline$\approx0.892$; AUPRC no-skill$\approx0.805$}
 \label{tab_accuracy}
 \centering
 \setlength{\tabcolsep}{2.2pt}
@@ -219,7 +221,7 @@ Masked TCN--Transformer & $0.040\pm0.016$ & $0.723\pm0.018$ & $0.836\pm0.014$ & 
 \end{table}
 
 \begin{table}[htbp]
-\caption{Protocol~B (dedup + source-bounded + day split): primary $\tau=\mu{+}3\sigma$; test prevalence $56.4\%$; always-anomaly F1 $0.721$}
+\caption{Protocol~B (dedup + source-bounded + day split): primary $\tau=\mu{+}3\sigma$; test prevalence $56.4\%$; always-anomaly F1 baseline $0.721$}
 \label{tab_v2}
 \centering
 \setlength{\tabcolsep}{2.2pt}
@@ -239,7 +241,7 @@ Masked TCN--Transformer & $0.151\pm0.183$ & $0.532\pm0.112$ & $0.557\pm0.124$ & 
 \end{table}
 
 \begin{table}[htbp]
-\caption{Protocol~B threshold sensitivity for Masked TCN--Transformer (mean F1 over 5 seeds; AUC unchanged by threshold)}
+\caption{Protocol~B threshold sensitivity for Masked TCN--Transformer (mean F1 over 5 seeds)}
 \label{tab_thr}
 \centering
 \setlength{\tabcolsep}{3pt}
@@ -253,27 +255,31 @@ $0.696$ & $0.585$ & $0.151$ & $0.300$ & $0.181$ & $0.741$ \\
 \end{table}
 
 \subsection{Results}
-On Protocol~A, DeepLog leads ROC-AUC ($0.781$) while reconstruction AEs obtain higher F1 variance; the TCN is \emph{worse} than no-TCN on mean F1/AUC and $\approx26\times$ slower at batch-1 PLL. Critically, always-anomaly F1 ($0.892$) exceeds every learned F1 at $\mu{+}3\sigma$, and AUPRC values must be read against prevalence $0.805$.
+On Protocol~A, DeepLog leads ROC-AUC ($0.781$); the TCN is \emph{worse} than no-TCN on mean F1/AUC and much slower at batch-1 PLL. The always-anomaly F1 baseline ($0.892$) exceeds every learned F1 at $\mu{+}3\sigma$; AUPRC must be read against prevalence $0.805$.
 
-On Protocol~B, masked models lose day-to-day ranking (AUC$\approx0.49$--$0.53$), so prior archive-order gains do not survive dedup+day holdout. PCA keeps a small positive AUPRC lift ($+0.098$). Table~\ref{tab_thr} shows $\mu{+}3\sigma$ starves recall; $\mu{+}1\sigma$ F1 ($0.696$) approaches the trivial ceiling ($0.721$) without improving AUC---evidence that loose thresholds harvest prevalence, not representation quality. Oracle-val F1 ($0.741$) is only marginally above always-anomaly. TCN remains slower ($51$ vs.\ $19$~ms) without consistent accuracy gains.
+On Protocol~B, masked models lose day-to-day ranking (AUC$\approx0.49$--$0.53$). PCA keeps a small positive AUPRC lift ($+0.098$). Table~\ref{tab_thr}: $\mu{+}3\sigma$ starves recall; $\mu{+}1\sigma$ F1 ($0.696$) approaches the always-anomaly baseline ($0.721$) without improving AUC---loose thresholds harvest prevalence, not representation quality. Oracle-val F1 ($0.741$) is only marginally above the trivial baseline. TCN remains slower ($51$ vs.\ $19$~ms) without consistent accuracy gains.
+
+Due to privacy restrictions, raw campus telemetry cannot be redistributed. We retain code, configuration, aggregate split statistics, and derived evaluation JSON artifacts in the project repository for co-author reproduction; a public mirror is contingent on institutional approval.
 
 \section{Discussion \& Threats to Validity}
-\textbf{What sequence means}: Protocol~A orders archive members, not wall-clock events. Protocol~B removes cross-member windows and duplicate lines but still uses backup-day folders rather than verified timestamps.
+\textbf{What sequence means}: Protocol~A orders archive members, not wall-clock events. Protocol~B removes cross-member windows and duplicate raw lines but still uses backup-day folders rather than verified timestamps.
 
-\textbf{Window OR labels}: OR aggregation manufactures high prevalence; trivial classifiers set the F1 ceiling. Ranking metrics and lift-over-prevalence are mandatory companions to F1.
+\textbf{Window OR labels}: OR aggregation manufactures high prevalence and makes the always-anomaly F1 baseline a necessary reference (not an upper bound: a perfect detector still has F1$=1$). Ranking metrics and lift-over-prevalence must accompany thresholded F1.
 
-\textbf{Proxy labels}: HTTP/keyword heuristics are not SOC truth; day shift may change keyword base rates.
+\textbf{Proxy labels and label--feature coupling}: HTTP status tokens, deny/block fields, and keyword heuristics both \emph{define} proxy labels and often remain visible in template text. Models may therefore learn the labeling rule rather than operational anomalies. Gold SOC labels and keyword-ablated inputs are required before operational claims.
 
-\textbf{Ethics}: Campus telemetry stays private; any release needs redaction and authorization.
+\textbf{Ethics}: Campus telemetry stays private; any future release needs redaction and authorization.
 
 \section{Conclusion}
-We showed that archive-order splits and OR window labels can inflate both prevalence and apparent detector quality on HUFLIT campus logs. After deduplication, source-bounded windows, and day holdout, masked TCN/Transformer ranking collapses while PCA retains a modest AUPRC lift; TCN adds latency without a reliable benefit. Future work: true event timestamps, SOC labels, public-benchmark parity, and---separately---measured local LLM narration.
+We showed that archive-order splits and OR window labels can inflate prevalence and make thresholded F1 look stronger than ranking warrants on HUFLIT campus logs. After deduplication, source-bounded windows, and day holdout, masked TCN/Transformer ranking collapses while PCA retains a modest AUPRC lift; TCN adds latency without a reliable benefit. Future work: event timestamps, SOC labels, Loghub~\cite{ref_loghub} sanity checks under the same harness, keyword-ablated inputs, and---separately---measured local LLM narration.
 
 \section*{Acknowledgment}
-The authors thank the Faculty of Information Technology, Ho Chi Minh City University of Foreign Languages - Information Technology (HUFLIT), Ho Chi Minh City, Vietnam for providing the production campus log telemetry and computing infrastructure. In compliance with Springer Nature authorship policies, generative AI tools were used to assist in literature review verification, manuscript refinement, and English copy-editing; all core technical research, architectural designs, empirical implementations, and experimental evaluations were conducted directly by the authors.
+The authors thank the Faculty of Information Technology, Ho Chi Minh City University of Foreign Languages - Information Technology (HUFLIT), Ho Chi Minh City, Vietnam for providing the production campus log telemetry and computing infrastructure. Generative AI tools assisted with bibliographic search, cross-checking, manuscript refinement, and English copy-editing; all citations were independently verified by the authors, and all core research, designs, implementations, and evaluations were conducted by the authors.
 
-\enlargethispage{5.0\baselineskip}
-\begin{thebibliography}{25}\fontsize{5.5pt}{6.5pt}\selectfont
+\section*{Disclosure of Interests}
+The authors have no competing interests to declare that are relevant to the content of this article.
+
+\begin{thebibliography}{20}\fontsize{5.5pt}{6.5pt}\selectfont
 \setlength{\itemsep}{-1.1pt}
 \setlength{\parskip}{0pt}
 \setlength{\parsep}{0pt}
@@ -285,14 +291,9 @@ The authors thank the Faculty of Information Technology, Ho Chi Minh City Univer
 \bibitem{ref_pca} Xu, W., Huang, L., Fox, A., Patterson, D., Jordan, M.I.: Mining Console Logs for Large-Scale System Problem Detection. In: Proc. 3rd Conf. SysML (2008).
 \bibitem{ref_tcn} Bai, S., Kolter, J.Z., Koltun, V.: An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling. arXiv preprint arXiv:1803.01271 (2018).
 \bibitem{ref_attention} Vaswani, A., Shazeer, N., Parmar, N., et al.: Attention Is All You Need. In: Adv. Neural Inf. Process. Syst. (NeurIPS), vol. 30, pp. 5998--6008 (2017).
-\bibitem{ref_phi3} Abdin, M., Aneja, J., Awadalla, H., et al.: Phi-3 Technical Report: A Highly Capable Language Model Locally on Your Phone. arXiv preprint arXiv:2404.14219 (2024).
-\bibitem{ref_mistral} Jiang, A.Q., Sablayrolles, A., Mensch, A., et al.: Mistral 7B. arXiv preprint arXiv:2310.06825 (2023).
-\bibitem{ref_qlora} Dettmers, T., Pagnoni, A., Holtzman, A., Zettlemoyer, L.: QLoRA: Efficient Finetuning of Quantized LLMs. In: Adv. Neural Inf. Process. Syst. (NeurIPS), vol. 36 (2023).
-\bibitem{ref_awq} Lin, J., Tang, J., Tang, H., Yang, S., Chen, W.M., Wang, W.C., Xiao, G., Dang, X., Gan, C., Han, S.: AWQ: Activation-aware Weight Quantization for On-Device LLM Compression and Acceleration. In: Proc. Mach. Learn. Syst. (MLSys), vol. 6 (2024).
 \bibitem{ref_llm_rca} Ahmed, T., Ghosh, S., Bansal, C., et al.: Recommending Root-Cause and Mitigation Steps for Cloud Incidents using Large Language Models. In: Proc. IEEE/ACM Int. Conf. Softw. Eng. (ICSE), pp. 1737--1749 (2023). \url{https://doi.org/10.1109/ICSE48619.2023.00149}
 \bibitem{ref_rca_survey} Soldani, J., Brogi, A.: Anomaly Detection and Failure Root Cause Analysis in (Micro)Service-Based Cloud Applications: A Survey. ACM Comput. Surv. 55(3), 1--39 (2022).
 \bibitem{ref_loghub} Zhu, J., He, S., He, P., Liu, J., Lyu, M.R.: Loghub: A Large Collection of System Log Datasets for AI-driven Log Analytics. In: Proc. 34th IEEE Int. Symp. Softw. Reliab. Eng. (ISSRE), pp. 355--366 (2023).
-\bibitem{ref_unsw} Moustafa, N., Slay, J.: UNSW-NB15: A Comprehensive Data Set for Network Intrusion Detection Systems. In: Proc. IEEE Mil. Commun. Inf. Syst. Conf. (MilCIS), pp. 1--6 (2015).
 \bibitem{ref_spell} Du, M., Li, F.: Spell: Streaming Parsing of System Event Logs. In: Proc. IEEE Int. Conf. Data Min. (ICDM), pp. 859--864 (2016).
 \bibitem{ref_llm4log_survey} Ma, Z., Yang, J., Chen, T.H.: LLM4Log: A Systematic Review of Large Language Model-based Log Analysis. arXiv preprint arXiv:2604.16359 (2026).
 \bibitem{ref_krone_2026} Ma, L., Liu, J., Zhang, T., VanNostrand, P.M., Hofmann, D.M., Cao, L., Rundensteiner, E.A., Chen, J.: Krone: Hierarchical and Modular Log Anomaly Detection. In: Proc. 42nd IEEE Int. Conf. Data Eng. (ICDE), pp. 1773--1787 (2026).

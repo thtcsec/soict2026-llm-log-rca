@@ -22,7 +22,7 @@
 |---|---|
 | **Title** | *Campus Log Anomaly Detection under Proxy Labels: A TCN–Transformer Study and Design for Local RCA Narration* |
 | **Track** | Software Engineering, Trusted Digital Platforms, and Smart Services (Secondary: Applied AI) |
-| **Authors** | Thanh Tien Cao∗, Tu Hoang Trinh, Ha Manh Tran (PGS.TS) |
+| **Authors** | Tien Thanh Cao∗, Hoang Tu Trinh, Manh Ha Tran (PGS.TS) |
 | **Affiliation** | Faculty of Information Technology, HUFLIT |
 | **Artifact** | https://github.com/thtcsec/soict2026-llm-log-rca (**private**) |
 | **Measured result (corrected)** | TCN–Transformer F1 **0.0395±0.0163**, AUC **0.7226±0.0178**; masked Transformer without TCN F1 **0.3475±0.4097**, AUC **0.7685±0.0351** |

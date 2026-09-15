@@ -39,7 +39,7 @@ Ho Chi Minh City, Vietnam\\
 \thispagestyle{empty}
 
 \begin{abstract}
-Campus log anomaly studies often treat archive order as time and window OR-aggregation as a label. We measure how those choices distort conclusions on a selective HUFLIT stream ($1{,}000{,}000$ deduplicated lines; custom similarity parser; HTTP/keyword \emph{proxy} labels). On a leaky stream-position split, test-window prevalence reaches $80.5\%$ because a window is positive if any of $L{=}20$ lines is positive; an always-anomaly classifier then obtains F1$\approx0.892$, while a masked TCN--Transformer under $\tau=\mu{+}3\sigma$ scores only $0.0395\pm0.0163$ F1 despite ROC-AUC $0.7226\pm0.0178$ (AUPRC lift over prevalence $\approx{+}0.031$). After global line-hash deduplication, source/member-bounded windows, and a day-held-out split (train 15--17~Jun, val 18~Jun, test 19~Jun 2026), test prevalence falls to $56.4\%$ (always-anomaly F1 baseline $0.721$), yet masked models collapse to near-chance ranking (TCN--Transformer ROC-AUC $0.5315\pm0.112$; no-TCN $0.4933\pm0.009$), while PCA retains a modest AUPRC lift ($+0.098$). Threshold sweeps show $\mu{+}3\sigma$ suppresses recall; looser rules inflate F1 toward the high-prevalence trivial baseline. The TCN adds latency (batch-1 $51.1$ vs.\ $18.5$~ms) without a consistent accuracy benefit. Local LLM RCA is left to future work.
+Campus log anomaly studies often treat archive order as time and window OR-aggregation as a label. We measure how those choices distort conclusions on a selective HUFLIT stream ($1{,}000{,}000$ deduplicated lines; custom similarity parser; HTTP/keyword \emph{proxy} labels). On a leaky stream-position split, test-window prevalence reaches $80.5\%$ because a window is positive if any of $L{=}20$ lines is positive; an always-anomaly classifier then obtains F1$\approx0.892$, while a masked TCN--Transformer under $\tau=\mu{+}3\sigma$ scores only $0.0395\pm0.0163$ F1 despite ROC-AUC $0.7226\pm0.0178$ (AUPRC lift over prevalence $\approx{+}0.031$). After global line-hash deduplication, source/member-bounded windows, and a day-held-out split (train 15--17~Jun, val 18~Jun, test 19~Jun 2026), test prevalence falls to $56.4\%$ (always-anomaly F1 baseline $0.721$); DeepLog retains the strongest mean AUPRC lift ($+0.138$) but with large seed variance, masked models collapse near chance, and PCA stays more stable ($+0.098$). Keyword/status template ablation only partially reduces PCA lift ($+0.098\rightarrow+0.084$). Threshold sweeps show $\mu{+}3\sigma$ suppresses recall; looser rules inflate F1 toward the high-prevalence trivial baseline. The TCN adds latency (batch-1 $51.1$ vs.\ $18.5$~ms) without a consistent accuracy benefit. Local LLM RCA is left to future work.
 \keywords{AIOps \and Log Anomaly Detection \and Proxy Labels \and Experimental Validity \and TCN--Transformer \and Campus Infrastructure.}
 \end{abstract}
 
@@ -51,9 +51,9 @@ This paper treats those validity threats as first-class experimental objects. We
 The contributions are:
 \begin{itemize}
     \item \textbf{Validity protocol}: quantify how OR window labels and archive-order splits inflate prevalence and inflate apparent F1 relative to an always-anomaly trivial baseline; retain dual-split evaluation artifacts (\texttt{huflit\_baselines.json}, \texttt{huflit\_v2\_*}).
-    \item \textbf{Dedup + day split}: global SHA-1 line dedup, windows that never cross (day, source, member), train/val/test by backup day.
+    \item \textbf{Dedup + day split}: global SHA-1 line dedup, windows that never cross (day, source, member), train/val/test by backup day; classical DeepLog/LogAnomaly-lite evaluated under the same Protocol~B arrays.
     \item \textbf{Threshold-aware reading}: $\mu{+}k\sigma$ and percentile sweeps plus a validation-oracle diagnostic, separating ranking from calibration.
-    \item \textbf{Negative TCN evidence}: on both protocols the TCN does not consistently beat a masked Transformer without TCN, while increasing leave-one-out scoring latency.
+    \item \textbf{Negative TCN evidence}: on both protocols the TCN does not consistently beat a masked Transformer without TCN, while increasing leave-one-out scoring latency; keyword/status ablation shows only partial proxy-token leakage into PCA lift.
 \end{itemize}
 
 \begin{figure*}[t]
@@ -139,6 +139,8 @@ Records are ordered by backup day $\rightarrow$ ZIP $\rightarrow$ member $\right
 \subsection{Protocol B (dedup + source-bounded + day split)}
 We keep the first SHA-1 of each \emph{raw line} ($262{,}194$ duplicates skipped while filling $1$M unique lines), emit windows only inside one (day, source, member) group, and assign days $15$--$17$~Jun$\rightarrow$train, $18$~Jun$\rightarrow$val, $19$~Jun$\rightarrow$test. Day folders are backup collection periods, not verified per-event timestamps. Sources: aca/careerhub/courses. Test-window prevalence is $56.36\%$ (always-anomaly F1 baseline $0.721$).
 
+Global exact-line deduplication may also remove legitimate repeated events that recur identically across backup days; we therefore treat it as a \emph{conservative decontamination} step that can alter the day-held-out test distribution, and report this as an additional validity limitation rather than a claim that every duplicate is a backup artifact.
+
 Raw-line dedup does \emph{not} imply unique template windows: different raw strings can map to the same template-ID sequence, and similar traffic on different days can yield identical windows. We therefore report \textbf{exact template-ID window sequence overlap} (SHA-1 of the integer window vector): $505$ train/val and $110$ train/test shared windows (\texttt{huflit\_v2\_split\_meta.json}).
 
 \subsection{Experimental Setup}
@@ -175,23 +177,17 @@ Hardware & CPU, 2 PyTorch threads \\
 \end{table}
 
 \subsection{Models and Metrics}
-We evaluate PCA count-vector reconstruction~\cite{ref_pca}, a masked Transformer without TCN, and the masked TCN--Transformer. Protocol~A also retains DeepLog/LogAnomaly-lite rows from the same-array suite. Metrics: F1 at $\mu{+}3\sigma$, ROC-AUC, AUPRC, \textbf{AUPRC lift over prevalence}, always-anomaly F1 baseline, and batch-1 PLL latency.
+We evaluate PCA count-vector reconstruction~\cite{ref_pca}, DeepLog~\cite{ref_deeplog}, LogAnomaly-lite~\cite{ref_loganomaly}, a masked Transformer without TCN, and the masked TCN--Transformer under \emph{both} protocols on the same window arrays. Metrics: F1 at $\mu{+}3\sigma$, ROC-AUC, AUPRC, \textbf{AUPRC lift over prevalence}, always-anomaly F1 baseline, and batch-1 PLL latency (masked models only).
 
 \begin{figure*}[t]
 \centering
-\begin{minipage}{0.32\textwidth}
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig2_tcn_loss.png}
-  \caption{Protocol~B masked training loss (mean over seeds).}
-  \label{fig_loss}
-\end{minipage}\hfill
-\begin{minipage}{0.32\textwidth}
+\begin{minipage}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{figures/fig3_roc_pr_curve.png}
   \caption{Protocol~A ROC/PR (leaky split; descriptive).}
   \label{fig_roc}
 \end{minipage}\hfill
-\begin{minipage}{0.32\textwidth}
+\begin{minipage}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{figures/fig4_llm_latency_triage.png}
   \caption{Protocol~B batch-1 vs batched PLL latency.}
@@ -232,12 +228,32 @@ Masked TCN--Transformer & $0.040\pm0.016$ & $0.723\pm0.018$ & $0.836\pm0.014$ & 
 \textbf{Model} & \textbf{F1@$3\sigma$} & \textbf{ROC-AUC} & \textbf{AUPRC} & \textbf{Lift} & \textbf{Batch-1 ms} \\
 \midrule
 Always-anomaly (trivial) & $0.721$ & $0.500$ & $0.564$ & $0.000$ & --- \\
-PCA & $0.000\pm0.000$ & $0.629\pm0.008$ & $0.661\pm0.006$ & $\mathbf{+0.098}$ & --- \\
+PCA & $0.000\pm0.000$ & $0.629\pm0.008$ & $0.661\pm0.006$ & $+0.098$ & --- \\
+DeepLog & $0.013\pm0.027$ & $0.657\pm0.134$ & $0.702\pm0.153$ & $\mathbf{+0.138}$ & NR \\
+LogAnomaly-lite & $0.385\pm0.293$ & $0.632\pm0.109$ & $0.676\pm0.131$ & $+0.112$ & NR \\
 Masked Transformer (No TCN) & $0.001\pm0.002$ & $0.493\pm0.009$ & $0.511\pm0.007$ & $-0.052$ & $18.54\pm0.47$ \\
 Masked TCN--Transformer & $0.151\pm0.183$ & $0.532\pm0.112$ & $0.557\pm0.124$ & $-0.007$ & $51.11\pm9.08$ \\
 \bottomrule
 \end{tabular}%
 }
+\end{table}
+
+\begin{table}[htbp]
+\caption{Protocol~B keyword/status template ablation: 167 trigger templates ($\approx9.3\%$ of test tokens) remapped to pad before scoring; same $\tau=\mu{+}3\sigma$}
+\label{tab_ablation}
+\centering
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.88}
+\begin{tabular}{l c c c}
+\toprule
+\textbf{Model} & \textbf{ROC-AUC} & \textbf{AUPRC lift} & \textbf{$\Delta$ lift vs.\ full} \\
+\midrule
+PCA (full) & $0.629\pm0.008$ & $+0.098$ & --- \\
+PCA (ablated) & $0.626\pm0.007$ & $+0.084$ & $-0.014$ \\
+Masked Transformer (full) & $0.493\pm0.009$ & $-0.052$ & --- \\
+Masked Transformer (ablated) & $0.494\pm0.005$ & $-0.050$ & $+0.002$ \\
+\bottomrule
+\end{tabular}
 \end{table}
 
 \begin{table}[htbp]
@@ -257,7 +273,9 @@ $0.696$ & $0.585$ & $0.151$ & $0.300$ & $0.181$ & $0.741$ \\
 \subsection{Results}
 On Protocol~A, DeepLog leads ROC-AUC ($0.781$); the TCN is \emph{worse} than no-TCN on mean F1/AUC and much slower at batch-1 PLL. The always-anomaly F1 baseline ($0.892$) exceeds every learned F1 at $\mu{+}3\sigma$; AUPRC must be read against prevalence $0.805$.
 
-On Protocol~B, masked models lose day-to-day ranking (AUC$\approx0.49$--$0.53$). PCA keeps a small positive AUPRC lift ($+0.098$). Table~\ref{tab_thr}: $\mu{+}3\sigma$ starves recall; $\mu{+}1\sigma$ F1 ($0.696$) approaches the always-anomaly baseline ($0.721$) without improving AUC---loose thresholds harvest prevalence, not representation quality. Oracle-val F1 ($0.741$) is only marginally above the trivial baseline. TCN remains slower ($51$ vs.\ $19$~ms) without consistent accuracy gains.
+On Protocol~B (Table~\ref{tab_v2}), DeepLog and LogAnomaly-lite retain the strongest mean AUPRC lifts ($+0.138$ and $+0.112$), but with large seed variance (DeepLog ROC-AUC $0.657\pm0.134$). Masked models lose day-to-day ranking (AUC$\approx0.49$--$0.53$). PCA keeps a smaller but more stable lift ($+0.098$). Table~\ref{tab_thr}: $\mu{+}3\sigma$ starves recall; $\mu{+}1\sigma$ F1 ($0.696$) approaches the always-anomaly baseline ($0.721$) without improving AUC---loose thresholds harvest prevalence, not representation quality. Oracle-val F1 ($0.741$) is only marginally above the trivial baseline. TCN remains slower ($51$ vs.\ $19$~ms) without consistent accuracy gains.
+
+Table~\ref{tab_ablation}: remapping $167$ proxy-trigger templates ($\approx9.3\%$ of test tokens) to pad reduces PCA lift from $+0.098$ to $+0.084$ without collapsing ranking to chance, while the masked Transformer stays near chance before and after ablation. Apparent anomaly signal is therefore only \emph{partly} attributable to verbatim label tokens; residual structure remains after this conservative token ablation.
 
 Due to privacy restrictions, raw campus telemetry cannot be redistributed. We retain code, configuration, aggregate split statistics, and derived evaluation JSON artifacts in the project repository for co-author reproduction; a public mirror is contingent on institutional approval.
 
@@ -266,12 +284,12 @@ Due to privacy restrictions, raw campus telemetry cannot be redistributed. We re
 
 \textbf{Window OR labels}: OR aggregation manufactures high prevalence and makes the always-anomaly F1 baseline a necessary reference (not an upper bound: a perfect detector still has F1$=1$). Ranking metrics and lift-over-prevalence must accompany thresholded F1.
 
-\textbf{Proxy labels and label--feature coupling}: HTTP status tokens, deny/block fields, and keyword heuristics both \emph{define} proxy labels and often remain visible in template text. Models may therefore learn the labeling rule rather than operational anomalies. Gold SOC labels and keyword-ablated inputs are required before operational claims.
+\textbf{Proxy labels and label--feature coupling}: HTTP status tokens, deny/block fields, and keyword heuristics both \emph{define} proxy labels and often remain visible in template text. Models may therefore learn the labeling rule rather than operational anomalies. Our keyword/status template ablation (Table~\ref{tab_ablation}) shows a modest drop in PCA lift and unchanged near-chance masked ranking, supporting partial leakage without claiming that proxy tokens are the sole signal. Gold SOC labels remain required before operational claims.
 
 \textbf{Ethics}: Campus telemetry stays private; any future release needs redaction and authorization.
 
 \section{Conclusion}
-We showed that archive-order splits and OR window labels can inflate prevalence and make thresholded F1 look stronger than ranking warrants on HUFLIT campus logs. After deduplication, source-bounded windows, and day holdout, masked TCN/Transformer ranking collapses while PCA retains a modest AUPRC lift; TCN adds latency without a reliable benefit. Future work: event timestamps, SOC labels, Loghub~\cite{ref_loghub} sanity checks under the same harness, keyword-ablated inputs, and---separately---measured local LLM narration.
+We showed that archive-order splits and OR window labels can inflate prevalence and make thresholded F1 look stronger than ranking warrants on HUFLIT campus logs. After deduplication, source-bounded windows, and day holdout, masked TCN/Transformer ranking collapses while PCA and classical sequence baselines retain unstable or modest AUPRC lifts; TCN adds latency without a reliable benefit. Keyword/status template ablation only partially reduces PCA lift. Future work: event timestamps, SOC labels, Loghub~\cite{ref_loghub} sanity checks under the same harness, and---separately---measured local LLM narration.
 
 \section*{Acknowledgment}
 The authors thank the Faculty of Information Technology, Ho Chi Minh City University of Foreign Languages - Information Technology (HUFLIT), Ho Chi Minh City, Vietnam for providing the production campus log telemetry and computing infrastructure. Generative AI tools assisted with bibliographic search, cross-checking, manuscript refinement, and English copy-editing; all citations were independently verified by the authors, and all core research, designs, implementations, and evaluations were conducted by the authors.

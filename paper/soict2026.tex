@@ -1,4 +1,4 @@
-\documentclass[runningheads]{llncs}
+\documentclass[a4paper]{llncs}
 
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}
@@ -39,14 +39,14 @@ Ho Chi Minh City, Vietnam\\
 \thispagestyle{empty}
 
 \begin{abstract}
-Campus log anomaly studies often treat archive order as time and window OR-aggregation as a label. On selective HUFLIT extracts, we compare (A)~an archive-ordered stream-position protocol and (B)~a $1{,}000{,}000$-line exact-deduplicated, source-bounded, backup-day-held-out protocol, using a custom similarity parser and HTTP/keyword \emph{proxy} labels. Under Protocol~A, test-window prevalence reaches $80.5\%$ because a window is positive if any of $L{=}20$ lines is positive; an always-anomaly classifier then obtains F1$\approx0.892$, while a masked TCN--Transformer under $\tau=\mu{+}3\sigma$ scores only $0.0395\pm0.0163$ F1 despite ROC-AUC $0.7226\pm0.0178$ (AUPRC lift over prevalence $\approx{+}0.031$). Under Protocol~B (train 15--17~Jun, val 18~Jun, test 19~Jun 2026 backup days), test prevalence falls to $56.4\%$ (always-anomaly F1 baseline $0.721$); DeepLog retains the strongest mean AUPRC lift ($+0.138$) but with large seed variance, masked models collapse near chance, and PCA stays more stable ($+0.098$). Keyword/status template ablation only partially reduces PCA lift ($+0.098\rightarrow+0.084$). Threshold sweeps show $\mu{+}3\sigma$ suppresses recall; looser rules inflate F1 toward the high-prevalence trivial baseline. Under Protocol~B, the TCN increases batch-1 PLL latency from $18.5$ to $51.1$~ms without a consistent accuracy benefit.
+Campus log anomaly studies often treat archive order as time and window OR-aggregation as a label. On selective HUFLIT extracts, we compare (A)~an archive-order stream-position protocol with validation contamination and (B)~a $1{,}000{,}000$-line exact-deduplicated, source-bounded, backup-day-held-out protocol, using a custom similarity parser and HTTP/keyword \emph{proxy} labels. Under Protocol~A, test-window prevalence reaches $80.5\%$ because a window is positive if any of $L{=}20$ lines is positive; an always-anomaly classifier then obtains F1$\approx0.892$, while a masked TCN--Transformer under $\tau=\mu{+}3\sigma$ scores only $0.0395\pm0.0163$ F1 despite ROC-AUC $0.7226\pm0.0178$ (AUPRC lift over prevalence $\approx{+}0.031$). Under Protocol~B (train 15--17~Jun, val 18~Jun, test 19~Jun 2026 backup days), test prevalence falls to $56.4\%$ (always-anomaly F1 baseline $0.721$); DeepLog retains the strongest mean AUPRC lift ($+0.138$) but with large seed variance, masked models collapse near chance, and PCA stays more stable ($+0.098$). Keyword/status template ablation only partially reduces PCA lift ($+0.098\rightarrow+0.084$). Threshold sweeps show $\mu{+}3\sigma$ suppresses recall; looser rules inflate F1 toward the high-prevalence trivial baseline. Under Protocol~B, the TCN increases batch-1 PLL latency from $18.5$ to $51.1$~ms without a consistent accuracy benefit.
 \keywords{AIOps \and Log Anomaly Detection \and Proxy Labels \and Experimental Validity \and TCN--Transformer \and Campus Infrastructure.}
 \end{abstract}
 
 \section{Introduction}
 Campus IT services emit heterogeneous operational logs. Sequence detectors can score unusual template patterns~\cite{ref_deeplog,ref_loganomaly,ref_logrobust,ref_swisslog}, but archive packaging, duplicate backups, and heuristic labels can invent ``temporal'' structure that models then appear to learn. Prior empirical studies already show that training-data selection, grouping, class distribution, and noise strongly affect public LAD benchmarks~\cite{ref_le_zhang_2022,ref_albert_2025}. We extend that validity agenda to a setting those studies do not isolate: institutional \emph{backup archives} whose folder order is not event time, with exact raw-line contamination audits, OR-window prevalence inflation, proxy-label/feature coupling, and negative evidence for a masked TCN--Transformer.
 
-This paper treats those threats as first-class experimental objects. We study a masked TCN--Transformer and a no-TCN ablated Transformer on HUFLIT selective extracts under two protocols: (A)~a leaky stream-position split that mirrors a common but flawed archive ordering; (B)~a jointly decontaminated protocol (exact-line deduplication, boundary-safe windows, and backup-day holdout). We add trivial baselines (always-anomaly; no-skill AUPRC $=$ prevalence), report AUPRC lift over prevalence within each protocol, and sweep validation thresholds. We do \emph{not} claim an LLM root-cause system.
+This paper treats those threats as first-class experimental objects. We study a masked TCN--Transformer and a no-TCN ablated Transformer on HUFLIT selective extracts under two protocols: (A)~an archive-order stream-position split with validation contamination; (B)~a jointly decontaminated protocol (exact-line deduplication, boundary-safe windows, and backup-day holdout). We add trivial baselines (always-anomaly; no-skill AUPRC $=$ prevalence), report AUPRC lift over prevalence within each protocol, and sweep validation thresholds. We do \emph{not} claim an LLM root-cause system.
 
 The contributions are:
 \begin{itemize}
@@ -85,7 +85,7 @@ Le and Zhang~\cite{ref_le_zhang_2022} show that training-data selection, groupin
 \textbf{Approach} & \textbf{Parser} & \textbf{Detector} & \textbf{Focus} & \textbf{CPU ms} \\
 \midrule
 DeepLog~\cite{ref_deeplog} & Spell & LSTM next-token & Sequence LAD & NR$^\dagger$ \\
-LogAnomaly~\cite{ref_loganomaly} & Template+FT & Semantic LSTM & Sequence LAD & NR$^{\dagger,\ddagger}$ \\
+LogAnomaly~\cite{ref_loganomaly} & FT-Tree + template2Vec & LSTM (seq.\ + quant.) & Sequence LAD & NR$^{\dagger,\ddagger}$ \\
 LogRobust~\cite{ref_logrobust} & Drain & Bi-LSTM+Attn & Unstable logs & NR \\
 SwissLog~\cite{ref_swisslog} & Online & Attentive Bi-LSTM & Interleaved logs & NR \\
 Le \& Zhang~\cite{ref_le_zhang_2022} & Drain & Multiple DL & Public-benchmark validity & NR \\
@@ -96,7 +96,7 @@ Albert~\cite{ref_albert_2025} & Drain & DeepLog-based & Chronological LAD protoc
 }
 \end{table}
 \smallskip
-{\footnotesize $^\dagger$Legacy batched ms retained in JSON but not relabeled as batch-1 PLL. $^\ddagger$LogAnomaly-lite reimplementation on our templates, not the authors' FastText stack. $^\S$Batch-1 leave-one-out PLL on Protocol~B (CPU, 2 threads).}
+{\footnotesize $^\dagger$Legacy batched ms retained in JSON but not relabeled as batch-1 PLL. $^\ddagger$LogAnomaly-lite is our reimplementation on indexed templates and does not reproduce the original template2Vec semantic representation or the quantitative (count) branch; scoring uses mean token reconstruction NLL only. $^\S$Batch-1 leave-one-out PLL on Protocol~B (CPU, 2 threads).}
 
 \section{Methodology}
 \subsection{System Architecture Overview}
@@ -137,8 +137,8 @@ The primary threshold is $\tau=\mu_{\mathrm{val}}+3\sigma_{\mathrm{val}}$ on nom
 \subsection{Corpus and Window Labels}
 We stream selective June daily backup archives from a local institutional campus extract, focusing on application/service syslog members from aca, careerhub, and courses. We skip \texttt{fortigate.csv} (heterogeneous firewall CSV schema; not comparable to the syslog template stream without a separate parser) and members ${>}500$~MiB (computational bound for the selective ingest). Protocol~B keeps the first $1$M unique raw lines under per-day and per-file caps ($200$k lines/day; $40$k/file). Proxy line labels use HTTP $4$xx/$5$xx, deny/block fields, and keywords---not SOC adjudication. A window is positive iff \emph{any} of its $L$ lines is positive (OR aggregation). Under independence, $1-(1-p)^{L}$ with $p{=}0.0796$ predicts prevalence $\approx0.81$, matching Protocol~A's $80.5\%$ test rate.
 
-\subsection{Protocol A (leaky archive split)}
-Records are ordered by backup day $\rightarrow$ ZIP $\rightarrow$ member $\rightarrow$ in-member position, then split $80$/$10$/$10$ before windowing. This is \emph{not} event time: windows may cross file/service boundaries. A raw-line hash audit found $36.235\%$ of unique validation lines also in training and $11.382\%$ validation/test line overlap; train/test exact raw-line overlap is only $0.0176\%$ of unique test lines ($13$ shared hashes), so Protocol~A's risk is primarily archive-order structure and validation contamination rather than massive train$\rightarrow$test line leakage. Exact template-window overlap is likewise small on test ($13$ of $7{,}573$ unique test windows). Results: \texttt{huflit\_baselines.json}.
+\subsection{Protocol A (archive-order split with validation contamination)}
+Records are ordered by backup day $\rightarrow$ ZIP $\rightarrow$ member $\rightarrow$ in-member position, then split $80$/$10$/$10$ before windowing. This is \emph{not} event time: windows may cross file/service boundaries. A raw-line hash audit found $36.235\%$ of unique validation lines also in training and $11.382\%$ validation/test line overlap; train/test exact raw-line overlap is only $0.0176\%$ of unique test lines ($13$ shared hashes), so Protocol~A's primary risk is archive-order structure and \emph{validation contamination} (validation is used for threshold calibration) rather than massive train$\rightarrow$test line leakage. Exact template-window overlap is likewise small on test ($13$ of $7{,}573$ unique test windows). Results: \texttt{huflit\_baselines.json}.
 
 \subsection{Protocol B (dedup + source-bounded + backup-day holdout)}
 Protocol~B \emph{jointly} applies exact-line deduplication, boundary-safe windowing, and backup-day holdout; we therefore treat A$\rightarrow$B as a comparison of protocols, not a causal ablation of archive ordering alone. We keep the first SHA-1 of each \emph{raw line} ($262{,}194$ duplicates skipped while filling $1$M unique lines), emit windows only inside one (backup-day, source, member) group, and assign backup days $15$--$17$~Jun$\rightarrow$train, $18$~Jun$\rightarrow$val, $19$~Jun$\rightarrow$test. Day folders are backup collection periods, not verified per-event timestamps. Test-window prevalence is $56.36\%$ (always-anomaly F1 baseline $0.721$).
@@ -185,12 +185,12 @@ Hardware & CPU, 2 PyTorch threads \\
 \toprule
 \textbf{Component} & \textbf{Configuration} \\
 \midrule
-PCA & Count vectors; $n{=}32$ components (or $\min(32,n_{\mathrm{nom}}{-}1,|\mathcal{V}|{-}1)$); sklearn default SVD \\
-DeepLog & Emb~$64$, LSTM hidden~$128$, $2$ layers; next-token CE; Adam $10^{-3}$; batch~$256$; $6$ epochs \\
-LogAnomaly-lite & Emb+$2$-layer LSTM recon (no FastText/template semantics); mean token NLL score; same opt.\\
-Masked Transformer & $d{=}128$, heads~$4$, $1$ layer, FFN~$256$, mask~$15\%$; leave-one-out PLL \\
-Masked TCN--Transformer & As above $+$ causal conv $k{=}3$, dilations $\{1,2\}$ \\
-Primary / diagnostic thr. & $\mu_{\mathrm{val}}{+}3\sigma_{\mathrm{val}}$ on nominal val; val-F1 oracle (diagnostic) \\
+PCA & Count vectors; $n{=}32$ components (capped); sklearn SVD; score $=$ reconstruction MSE \\
+DeepLog & Emb~$64$, LSTM hidden~$128$, $2$ layers; next-token CE; score $=$ mean next-token NLL; Adam $10^{-3}$; batch~$256$; $6$ epochs \\
+LogAnomaly-lite & Emb+$2$-layer LSTM recon on template IDs only (no template2Vec; no quantitative branch); score $=$ mean token NLL; same opt.\\
+Masked Transformer & $d{=}128$, heads~$4$, $1$ layer, FFN~$256$, mask~$15\%$; score $=$ leave-one-out PLL \\
+Masked TCN--Transformer & As above $+$ causal conv $k{=}3$, dilations $\{1,2\}$; same PLL score \\
+Primary / diagnostic thr. & $\mu_{\mathrm{val}}{+}3\sigma_{\mathrm{val}}$ on nominal val; val-F1 oracle applied to \emph{test} scores (diagnostic) \\
 \bottomrule
 \end{tabular}%
 }
@@ -204,19 +204,19 @@ We evaluate PCA count-vector reconstruction~\cite{ref_pca}, DeepLog~\cite{ref_de
 \begin{minipage}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{figures/fig3_roc_pr_curve.png}
-  \caption{Protocol~A ROC/PR for seed $404$ (illustrative of one of five seeds; tables report mean$\pm$std).}
+  \caption{Protocol~A ROC/PR for seed $404$ (illustrative; first of the five evaluation seeds in tables; mean$\pm$std reported separately).}
   \label{fig_roc}
 \end{minipage}\hfill
 \begin{minipage}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{figures/fig4_llm_latency_triage.png}
-  \caption{Protocol~B batch-1 vs batched PLL latency.}
+  \caption{Protocol~B batch-1 PLL latency: Masked Transformer (No TCN) vs.\ Masked TCN--Transformer.}
   \label{fig_triage}
 \end{minipage}
 \end{figure*}
 
 \begin{table}[htbp]
-\caption{Protocol~A (leaky stream-position): $\tau=\mu{+}3\sigma$; test prevalence $80.5\%$; always-anomaly F1 baseline$\approx0.892$; AUPRC no-skill$\approx0.805$}
+\caption{Protocol~A (archive-order stream-position with validation contamination): $\tau=\mu{+}3\sigma$; test prevalence $80.5\%$; always-anomaly F1 baseline$\approx0.892$; AUPRC no-skill$\approx0.805$}
 \label{tab_accuracy}
 \centering
 \setlength{\tabcolsep}{2.2pt}
@@ -278,7 +278,7 @@ Masked Transformer (ablated) & $0.494\pm0.005$ & $-0.050$ & $+0.002$ \\
 \end{table}
 
 \begin{table}[htbp]
-\caption{Protocol~B threshold comparison (mean over 5 seeds): fixed $\mu{+}3\sigma$ vs.\ validation-selected F1 threshold (diagnostic)}
+\caption{Protocol~B threshold comparison (mean over 5 seeds): fixed $\mu{+}3\sigma$ vs.\ \emph{test} metrics at a validation-selected F1 threshold $\tau_{\mathrm{val}}$ (diagnostic)}
 \label{tab_thr}
 \centering
 \setlength{\tabcolsep}{2.5pt}
@@ -286,7 +286,7 @@ Masked Transformer (ablated) & $0.494\pm0.005$ & $-0.050$ & $+0.002$ \\
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{l c c c c c c}
 \toprule
-\textbf{Model} & \textbf{F1@$3\sigma$} & \textbf{P@$3\sigma$} & \textbf{R@$3\sigma$} & \textbf{F1$_{\mathrm{val}}$} & \textbf{P$_{\mathrm{val}}$} & \textbf{R$_{\mathrm{val}}$} \\
+\textbf{Model} & \textbf{F1@$3\sigma$} & \textbf{P@$3\sigma$} & \textbf{R@$3\sigma$} & \textbf{F1@$\tau_{\mathrm{val}}$} & \textbf{P@$\tau_{\mathrm{val}}$} & \textbf{R@$\tau_{\mathrm{val}}$} \\
 \midrule
 PCA & $0.000$ & $0.000$ & $0.000$ & $0.729$ & $0.585$ & $0.966$ \\
 DeepLog & $0.013$ & $0.423$ & $0.007$ & $0.745$ & $0.619$ & $0.934$ \\
@@ -301,7 +301,7 @@ Masked TCN--Transformer & $0.151$ & $0.354$ & $0.102$ & $0.741$ & $0.608$ & $0.9
 \subsection{Results}
 On Protocol~A, DeepLog leads ROC-AUC ($0.781$); LogAnomaly-lite is close ($0.777$). The TCN is \emph{worse} than no-TCN on mean F1/AUC and much slower at batch-1 PLL. The always-anomaly F1 baseline ($0.892$) exceeds every learned F1 at $\mu{+}3\sigma$; AUPRC must be read against prevalence $0.805$.
 
-On Protocol~B (Table~\ref{tab_v2}), DeepLog and LogAnomaly-lite retain the strongest mean AUPRC lifts ($+0.138$ and $+0.112$), but with large seed variance (DeepLog ROC-AUC $0.657\pm0.134$). Masked models lose backup-day ranking (AUC$\approx0.49$--$0.53$). PCA keeps a smaller but more stable lift ($+0.098$). Table~\ref{tab_thr}: $\mu{+}3\sigma$ starves recall for most detectors (PCA/DeepLog/masked Transformer recall $\approx0$--$0.01$), while validation-selected thresholds recover F1$\approx0.73$--$0.75$---near the always-anomaly baseline ($0.721$)---showing that loose thresholds harvest prevalence rather than representation quality. Under Protocol~B, TCN remains slower ($51$ vs.\ $19$~ms) without consistent accuracy gains.
+On Protocol~B (Table~\ref{tab_v2}), DeepLog and LogAnomaly-lite retain the strongest mean AUPRC lifts ($+0.138$ and $+0.112$), but with large seed variance (DeepLog ROC-AUC $0.657\pm0.134$). Masked models lose backup-day ranking (AUC$\approx0.49$--$0.53$). PCA keeps a smaller but more stable lift ($+0.098$). Table~\ref{tab_thr}: $\mu{+}3\sigma$ starves recall for most detectors (PCA/DeepLog/masked Transformer recall $\approx0$--$0.01$), while thresholds selected on validation and evaluated on \emph{test} recover F1$\approx0.73$--$0.75$---near the always-anomaly test baseline ($0.721$)---showing that much of the apparent F1 gain is driven by prevalence and threshold calibration rather than strong ranking quality. Under Protocol~B, TCN remains slower ($51$ vs.\ $19$~ms) without consistent accuracy gains.
 
 Table~\ref{tab_ablation}: remapping $167$ proxy-trigger templates ($\approx9.3\%$ of test tokens) to padding reduces PCA lift from $+0.098$ to $+0.084$ without collapsing ranking to chance, while the masked Transformer stays near chance before and after ablation. For the masked models, remapping to padding removes these positions from attention and from the PLL average rather than introducing a dedicated ablation token; for PCA, pad IDs are simply omitted from the count vector. Residual correlation remains after template-level trigger ablation; without SOC labels, it cannot be interpreted as validated operational anomaly signal.
 
@@ -335,7 +335,7 @@ The authors have no competing interests to declare that are relevant to the cont
 \setlength{\parsep}{0pt}
 \bibitem{ref_drain3} He, P., Zhu, J., Zheng, Z., Lyu, M.R.: Drain: An Online Log Parsing Approach with Fixed Depth Tree. In: Proc. IEEE Int. Conf. Web Serv. (ICWS), pp. 33--40 (2017).
 \bibitem{ref_deeplog} Du, M., Li, F., Zheng, G., Srikumar, V.: DeepLog: Anomaly Detection and Diagnosis from System Logs through Deep Learning. In: Proc. ACM SIGSAC Conf. Comput. Commun. Secur. (CCS), pp. 1285--1298 (2017).
-\bibitem{ref_loganomaly} Meng, W., Liu, Y., Zhu, Y., et al.: LogAnomaly: Unsupervised Detection of Sequential and Quantitative Anomalies in Unstructured Logs. In: Proc. 28th Int. Joint Conf. Artif. Intell. (IJCAI), pp. 4739--4745 (2019).
+\bibitem{ref_loganomaly} Meng, W., Liu, Y., Zhu, Y., et al.: LogAnomaly: Unsupervised Detection of Sequential and Quantitative Anomalies in Unstructured Logs. In: Proc. 28th Int. Joint Conf. Artif. Intell. (IJCAI), pp. 4739--4745 (2019). \url{https://doi.org/10.24963/ijcai.2019/658}
 \bibitem{ref_logrobust} Zhang, X., Xu, Y., Lin, Q., et al.: Robust Log-Based Anomaly Detection on Unstable Log Data. In: Proc. 27th ACM Joint Eur. Softw. Eng. Conf. Symp. Found. Softw. Eng. (ESEC/FSE), pp. 807--817 (2019).
 \bibitem{ref_swisslog} Li, X., Chen, P., Jing, L., He, Z., Yu, G.: SwissLog: Robust Anomaly Detection and Localization for Interleaved Unstructured Logs. IEEE Trans. Dependable Secure Comput. 20(4), 2762--2780 (2023). \url{https://doi.org/10.1109/TDSC.2022.3162857}
 \bibitem{ref_pca} Xu, W., Huang, L., Fox, A., Patterson, D., Jordan, M.I.: Mining Console Logs for Large-Scale System Problem Detection. In: Proc. 3rd Workshop on Tackling Computer Systems Problems with Machine Learning Techniques (SysML), (2008).

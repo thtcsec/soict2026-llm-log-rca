@@ -58,6 +58,26 @@ def fig_roc_pr():
 
 
 def fig_latency():
+    # Prefer Protocol B validity JSON when present (No-TCN vs TCN batch-1).
+    v2_path = ROOT / "results" / "tables" / "huflit_v2_baselines.json"
+    if v2_path.exists():
+        v2 = json.loads(v2_path.read_text(encoding="utf-8"))
+        no = v2["models"]["Masked Transformer (No TCN)"]["primary_mu3sigma"]["batch1_ms"]["mean"]
+        tcn = v2["models"]["Proposed Masked TCN-Transformer"]["primary_mu3sigma"]["batch1_ms"]["mean"]
+        fig, ax = plt.subplots(figsize=(5.0, 3.0))
+        labels = ["Masked Transformer\n(No TCN)", "Masked TCN-\nTransformer"]
+        vals = [no, tcn]
+        ax.bar(labels, vals, color=["#1f77b4", "#d62728"], width=0.55, edgecolor="black")
+        ax.set_ylabel("Batch-1 PLL latency (ms)")
+        ax.set_title("Protocol B: TCN adds scoring latency", fontweight="bold")
+        ax.set_ylim(0, max(vals) * 1.25)
+        ax.grid(True, axis="y", linestyle=":", alpha=0.5)
+        for i, value in enumerate(vals):
+            ax.text(i, value * 1.05, f"{value:.2f}", ha="center", fontsize=10, fontweight="bold")
+        fig.tight_layout()
+        fig.savefig(OUT / "fig4_llm_latency_triage.png", dpi=300, bbox_inches="tight")
+        plt.close()
+        return
     batch1 = PROPOSED["batch1_latency_ms"]["mean"]
     batched = PROPOSED["batched_ms_per_seq"]["mean"]
     fig, ax = plt.subplots(figsize=(5.2, 3.0))

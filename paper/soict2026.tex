@@ -190,7 +190,7 @@ DeepLog-style$^\ast$ & Emb~$64$, LSTM hidden~$128$, $2$ layers; next-token CE; s
 LogAnomaly-lite & Emb+$2$-layer LSTM recon on template IDs only (no template2Vec; no quantitative branch); score $=$ mean token NLL; same optimizer. \\
 Masked Transformer & $d{=}128$, heads~$4$, $1$ layer, FFN~$256$, mask~$15\%$; score $=$ leave-one-out PLL. \\
 Masked TCN--Transformer & As above $+$ causal conv $k{=}3$, dilations $\{1,2\}$; same PLL score. \\
-Primary / diagnostic thr. & $\mu_{\mathrm{val}}{+}3\sigma_{\mathrm{val}}$ on nominal val; val-F1 oracle applied to \emph{test} scores (diagnostic). \\
+Primary / diagnostic thr. & $\mu_{\mathrm{val}}{+}3\sigma_{\mathrm{val}}$ on nominal val; validation-F1-selected threshold, fixed before test evaluation (diagnostic). \\
 \bottomrule
 \end{tabular}
 
@@ -323,7 +323,7 @@ Due to privacy restrictions, raw campus telemetry cannot be redistributed. We re
 \textbf{Ethics}: Campus telemetry stays private; any future release needs redaction and authorization.
 
 \section{Conclusion}
-We showed that OR window labels can inflate prevalence and make thresholded F1 look stronger than ranking warrants on HUFLIT campus logs, and that a jointly decontaminated backup-day-held-out protocol changes conclusions relative to an archive-ordered stream split. Masked TCN/Transformer ranking collapses under Protocol~B while PCA and classical sequence baselines retain unstable or modest AUPRC lifts; TCN adds latency without a reliable benefit. Keyword/status template ablation only partially reduces PCA lift. Future work: factorized protocol ablations, additional backup-day folds, event timestamps, SOC labels, and Loghub~\cite{ref_loghub} sanity checks under the same harness.
+We showed that OR window labels can inflate prevalence and make thresholded F1 look stronger than ranking warrants on HUFLIT campus logs, and that a jointly decontaminated backup-day-held-out protocol changes conclusions relative to an archive-ordered stream split. Masked TCN/Transformer ranking collapses on the evaluated Protocol~B held-out backup day while PCA and classical sequence baselines retain unstable or modest AUPRC lifts; TCN adds latency without a reliable benefit. Keyword/status template ablation only partially reduces PCA lift. Future work: factorized protocol ablations, additional backup-day folds, event timestamps, SOC labels, and Loghub~\cite{ref_loghub} sanity checks under the same harness.
 
 \section*{Acknowledgment}
 The authors thank the Faculty of Information Technology, Ho Chi Minh City University of Foreign Languages - Information Technology (HUFLIT), Ho Chi Minh City, Vietnam for providing the production campus log telemetry and computing infrastructure. Generative AI tools were used for literature discovery, consistency checking, and language refinement. All cited sources were independently verified by the authors. Study design, implementation, experimental execution, statistical analysis, interpretation, and final scholarly judgments were performed and approved by the authors.

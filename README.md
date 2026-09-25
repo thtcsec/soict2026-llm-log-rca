@@ -20,9 +20,9 @@
 
 | Field | Info |
 |---|---|
-| **Title** | *Campus Log Anomaly Detection under Proxy Labels: A TCN–Transformer Study and Design for Local RCA Narration* |
+| **Title** | *Campus Log Anomaly Detection under Proxy Labels: Validity Limits of Archive Splits and Masked TCN–Transformers* |
 | **Track** | Software Engineering, Trusted Digital Platforms, and Smart Services (Secondary: Applied AI) |
-| **Authors** | Tien Thanh Cao∗, Hoang Tu Trinh, Manh Ha Tran (PGS.TS) |
+| **Authors** | Hoang Tu Trinh∗, Tien Thanh Cao, Manh Ha Tran (PGS.TS) |
 | **Affiliation** | Faculty of Information Technology, HUFLIT |
 | **Artifact** | https://github.com/thtcsec/soict2026-llm-log-rca (**private**) |
 | **Measured result (corrected)** | TCN–Transformer F1 **0.0395±0.0163**, AUC **0.7226±0.0178**; masked Transformer without TCN F1 **0.3475±0.4097**, AUC **0.7685±0.0351** |
@@ -121,7 +121,7 @@ The raw-ingest script excludes every FortiGate member by default. Do not use
 @article{tu2026soict,
   title={Campus Log Anomaly Detection under Proxy Labels: A TCN--Transformer Study
          and Design for Local RCA Narration},
-  author={Cao, Thanh Tien and Trinh, Tu Hoang and Tran, Ha Manh},
+  author={Trinh, Tu Hoang and Cao, Thanh Tien and Tran, Ha Manh},
   journal={Manuscript in preparation for the 15th International Symposium on Information
            and Communication Technology (SOICT 2026)},
   year={2026},
@@ -132,5 +132,5 @@ The raw-ingest script excludes every FortiGate member by default. Do not use
 ---
 
 <p align="center">
-  <i>© 2026 Cao, Trinh &amp; Tran · Faculty of Information Technology, HUFLIT · All Rights Reserved</i>
+  <i>© 2026 Trinh, Cao &amp; Tran · Faculty of Information Technology, HUFLIT · All Rights Reserved</i>
 </p>

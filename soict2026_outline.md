@@ -12,16 +12,16 @@
 
 ## 📌 Proposed Paper Title
 
-> **"Campus Log Anomaly Detection under Proxy Labels: A TCN–Transformer Study and Design for Local RCA Narration"**
+> **"Campus Log Anomaly Detection under Proxy Labels: Validity Limits of Archive Splits and Masked TCN–Transformers"**
 
 ---
 
 ## 👥 Authors & Affiliations
 
-Order (as on manuscript): **Thành → Tú → Hà**
+Order (as on manuscript): **Tú → Thành → Hà**
 
-- **Thanh Tien Cao∗** (*Faculty of Information Technology, HUFLIT*) — corresponding: thanhct@huflit.edu.vn
-- **Tu Hoang Trinh** (*Faculty of Information Technology, HUFLIT*)
+- **Tu Hoang Trinh∗** (*Faculty of Information Technology, HUFLIT*) — corresponding / submitter: 23dh113972@st.huflit.edu.vn
+- **Thanh Tien Cao** (*Faculty of Information Technology, HUFLIT*)
 - **Ha Manh Tran** (*PGS.TS; Rector, HUFLIT, 2026–2030*) — research: networks, distributed systems, data mining, computer security, digital transformation
 
 ---

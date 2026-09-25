@@ -38,20 +38,20 @@ def fig_roc_pr():
     h = diag["representative_metrics"]
     seed = diag["representative_seed"]
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6.5, 3.0))
-    ax1.plot(roc["fpr"], roc["tpr"], color="#2ca02c", lw=1.6, label=f"HUFLIT (AUC={h['roc_auc']:.3f})")
+    ax1.plot(roc["fpr"], roc["tpr"], color="#2ca02c", lw=1.6, label=f"Masked TCN–Transformer (AUC={h['roc_auc']:.3f})")
     ax1.plot([0, 1], [0, 1], "k--", lw=1, alpha=0.5)
     ax1.set_xlabel("False Positive Rate")
     ax1.set_ylabel("True Positive Rate")
     ax1.set_title(f"ROC (seed {seed})", fontweight="bold")
     ax1.grid(True, linestyle=":", alpha=0.6)
-    ax1.legend(loc="lower right", fontsize=7.5)
+    ax1.legend(loc="lower right", fontsize=7.0)
 
-    ax2.plot(pr["recall"], pr["precision"], color="#2ca02c", lw=1.6, label=f"HUFLIT (AP={h['auprc']:.3f})")
+    ax2.plot(pr["recall"], pr["precision"], color="#2ca02c", lw=1.6, label=f"Masked TCN–Transformer (AP={h['auprc']:.3f})")
     ax2.set_xlabel("Recall")
     ax2.set_ylabel("Precision")
     ax2.set_title(f"Precision-Recall (seed {seed})", fontweight="bold")
     ax2.grid(True, linestyle=":", alpha=0.6)
-    ax2.legend(loc="lower left", fontsize=7.5)
+    ax2.legend(loc="lower left", fontsize=7.0)
     fig.tight_layout()
     fig.savefig(OUT / "fig3_roc_pr_curve.png", dpi=300, bbox_inches="tight")
     plt.close()
@@ -75,6 +75,8 @@ def fig_latency():
         for i, value in enumerate(vals):
             ax.text(i, value * 1.05, f"{value:.2f}", ha="center", fontsize=10, fontweight="bold")
         fig.tight_layout()
+        fig.savefig(OUT / "fig4_batch1_pll_latency.png", dpi=300, bbox_inches="tight")
+        # Keep legacy filename in sync for older scripts.
         fig.savefig(OUT / "fig4_llm_latency_triage.png", dpi=300, bbox_inches="tight")
         plt.close()
         return

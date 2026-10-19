@@ -1,0 +1,153 @@
+{
+  "purpose": "SOICT camera-ready label-aggregation sensitivity",
+  "protocols": [
+    {
+      "protocol": "huflit",
+      "n_test": 9999,
+      "n_train": 79999,
+      "L": 20,
+      "rows": [
+        {
+          "aggregation": "OR (stored proxy window labels)",
+          "k": 1,
+          "prevalence": 0.8046804680468047,
+          "always_anomaly_f1": 0.8917705735660848,
+          "note": "authoritative labels used in main tables",
+          "pca": {
+            "roc_auc": 0.7365958908320169,
+            "auprc": 0.9119780887217164,
+            "lift": 0.10729762067491166,
+            "f1_3sigma": 0.8701306378199445,
+            "prevalence": 0.8046804680468047,
+            "always_anomaly_f1": 0.8917705735660848
+          }
+        },
+        {
+          "aggregation": "1-of-L trigger-approx",
+          "k": 1,
+          "prevalence": 0.5481548154815482,
+          "always_anomaly_f1": 0.708139534883721,
+          "rule_oracle_f1": 1.0,
+          "rule_oracle_note": "Applying the same count>=k rule that defines the labels yields F1=1; this is a proxy-label consistency check, not an independent detector.",
+          "pca": {
+            "roc_auc": 0.9857401467131129,
+            "auprc": 0.9802852271706191,
+            "lift": 0.43213041168907085,
+            "f1_3sigma": 0.7747913424812561,
+            "prevalence": 0.5481548154815482,
+            "always_anomaly_f1": 0.708139534883721
+          },
+          "trigger_templates": 398
+        },
+        {
+          "aggregation": "2-of-L trigger-approx",
+          "k": 2,
+          "prevalence": 0.5468546854685469,
+          "always_anomaly_f1": 0.7070537272903601,
+          "rule_oracle_f1": 1.0,
+          "rule_oracle_note": "Applying the same count>=k rule that defines the labels yields F1=1; this is a proxy-label consistency check, not an independent detector.",
+          "pca": {
+            "roc_auc": 0.9783548333297545,
+            "auprc": 0.9683077139130786,
+            "lift": 0.4214530284445317,
+            "f1_3sigma": 0.7745042492917847,
+            "prevalence": 0.5468546854685469,
+            "always_anomaly_f1": 0.7070537272903601
+          },
+          "trigger_templates": 398
+        },
+        {
+          "aggregation": "3-of-L trigger-approx",
+          "k": 3,
+          "prevalence": 0.5438543854385438,
+          "always_anomaly_f1": 0.7045410377664053,
+          "rule_oracle_f1": 1.0,
+          "rule_oracle_note": "Applying the same count>=k rule that defines the labels yields F1=1; this is a proxy-label consistency check, not an independent detector.",
+          "pca": {
+            "roc_auc": 0.8877380091972179,
+            "auprc": 0.7872403252620691,
+            "lift": 0.2433859398235253,
+            "f1_3sigma": 0.7720045428733674,
+            "prevalence": 0.5438543854385438,
+            "always_anomaly_f1": 0.7045410377664053
+          },
+          "trigger_templates": 398
+        }
+      ]
+    },
+    {
+      "protocol": "huflit_v2",
+      "n_test": 19990,
+      "n_train": 59966,
+      "L": 20,
+      "rows": [
+        {
+          "aggregation": "OR (stored proxy window labels)",
+          "k": 1,
+          "prevalence": 0.563631815907954,
+          "always_anomaly_f1": 0.7209265124612086,
+          "note": "authoritative labels used in main tables",
+          "pca": {
+            "roc_auc": 0.6191581532174326,
+            "auprc": 0.6540173900721066,
+            "lift": 0.0903855741641526,
+            "f1_3sigma": 0.694787683638559,
+            "prevalence": 0.563631815907954,
+            "always_anomaly_f1": 0.7209265124612086
+          }
+        },
+        {
+          "aggregation": "1-of-L trigger-approx",
+          "k": 1,
+          "prevalence": 0.2762381190595298,
+          "always_anomaly_f1": 0.4328943242395735,
+          "rule_oracle_f1": 1.0,
+          "rule_oracle_note": "Applying the same count>=k rule that defines the labels yields F1=1; this is a proxy-label consistency check, not an independent detector.",
+          "pca": {
+            "roc_auc": 0.8245464806769354,
+            "auprc": 0.5785028529245511,
+            "lift": 0.3022647338650213,
+            "f1_3sigma": 0.5920403346921261,
+            "prevalence": 0.2762381190595298,
+            "always_anomaly_f1": 0.4328943242395735
+          },
+          "trigger_templates": 167
+        },
+        {
+          "aggregation": "2-of-L trigger-approx",
+          "k": 2,
+          "prevalence": 0.275887943971986,
+          "always_anomaly_f1": 0.43246422270143114,
+          "rule_oracle_f1": 1.0,
+          "rule_oracle_note": "Applying the same count>=k rule that defines the labels yields F1=1; this is a proxy-label consistency check, not an independent detector.",
+          "pca": {
+            "roc_auc": 0.8248056344997237,
+            "auprc": 0.5784339650586836,
+            "lift": 0.3025460210866976,
+            "f1_3sigma": 0.592373791621912,
+            "prevalence": 0.275887943971986,
+            "always_anomaly_f1": 0.43246422270143114
+          },
+          "trigger_templates": 167
+        },
+        {
+          "aggregation": "3-of-L trigger-approx",
+          "k": 3,
+          "prevalence": 0.2742371185592796,
+          "always_anomaly_f1": 0.43043341708542715,
+          "rule_oracle_f1": 1.0,
+          "rule_oracle_note": "Applying the same count>=k rule that defines the labels yields F1=1; this is a proxy-label consistency check, not an independent detector.",
+          "pca": {
+            "roc_auc": 0.8249403303208425,
+            "auprc": 0.5767695680329504,
+            "lift": 0.3025324494736708,
+            "f1_3sigma": 0.5900016143787332,
+            "prevalence": 0.2742371185592796,
+            "always_anomaly_f1": 0.43043341708542715
+          },
+          "trigger_templates": 167
+        }
+      ]
+    }
+  ]
+}

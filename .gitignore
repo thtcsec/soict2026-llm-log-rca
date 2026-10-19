@@ -6,6 +6,7 @@
 # --- DATA: EXCLUDE ALL RAW AND PROCESSED DATA DIRECTORIES ---
 data/raw/*
 data/processed/*
+data/private/
 data/Thang6.rar
 data/*.rar
 data/*.zip

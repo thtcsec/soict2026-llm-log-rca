@@ -1,0 +1,54 @@
+{
+  "status": "OK",
+  "validation": {
+    "train": {
+      "line_labels_shape": [
+        59966,
+        20
+      ],
+      "stored_or_n": 59966,
+      "recon_or_n": 59966,
+      "shape_ok": true,
+      "or_exact_match": true,
+      "recon_prevalence": 0.3941066604409165,
+      "stored_prevalence": 0.3941066604409165,
+      "recon_always_anomaly_f1": 0.5653895381523703,
+      "mismatch_count": 0
+    },
+    "val": {
+      "line_labels_shape": [
+        19988,
+        20
+      ],
+      "stored_or_n": 19988,
+      "recon_or_n": 19988,
+      "shape_ok": true,
+      "or_exact_match": true,
+      "recon_prevalence": 0.3232939763858315,
+      "stored_prevalence": 0.3232939763858315,
+      "recon_always_anomaly_f1": 0.4886200378071834,
+      "mismatch_count": 0
+    },
+    "test": {
+      "line_labels_shape": [
+        19990,
+        20
+      ],
+      "stored_or_n": 19990,
+      "recon_or_n": 19990,
+      "shape_ok": true,
+      "or_exact_match": true,
+      "recon_prevalence": 0.563631815907954,
+      "stored_prevalence": 0.563631815907954,
+      "recon_always_anomaly_f1": 0.7209265124612086,
+      "mismatch_count": 0
+    }
+  },
+  "stream_meta_comparison": {
+    "unique_kept_match": true,
+    "duplicates_skipped_match": true,
+    "raw_scanned_match": true,
+    "lines_per_day_match": true
+  },
+  "elapsed_sec": 33.81951840000693
+}

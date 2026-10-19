@@ -1,0 +1,60 @@
+{
+  "experiment": "protocol_b_k_of_l_fixed_pca_seed42",
+  "seed": 42,
+  "pca_fit": "nominal train under stored OR labels; scores fixed across k",
+  "line_label_source": "D:\\tu_projects\\LatexProject\\soict2026\\data\\private\\huflit_v2_line_labels\\test_line_labels.npy",
+  "reconstruction_status": "OK",
+  "rows": [
+    {
+      "n_pos": 11267,
+      "prevalence": 0.563631815907954,
+      "always_anomaly_f1": 0.7209265124612086,
+      "pca_roc_auc": 0.6191581532174326,
+      "pca_auprc": 0.6540173900721066,
+      "pca_auprc_lift": 0.0903855741641526,
+      "aggregation": "1-of-L (= OR)",
+      "k": 1
+    },
+    {
+      "n_pos": 9051,
+      "prevalence": 0.45277638819409705,
+      "always_anomaly_f1": 0.6233256430563686,
+      "pca_roc_auc": 0.6586969883077872,
+      "pca_auprc": 0.5891219131323739,
+      "pca_auprc_lift": 0.1363455249382769,
+      "aggregation": "2-of-L",
+      "k": 2
+    },
+    {
+      "n_pos": 7742,
+      "prevalence": 0.3872936468234117,
+      "always_anomaly_f1": 0.5583441511611135,
+      "pca_roc_auc": 0.7010463625586159,
+      "pca_auprc": 0.5660356361911503,
+      "pca_auprc_lift": 0.17874198936773855,
+      "aggregation": "3-of-L",
+      "k": 3
+    }
+  ],
+  "trigger_visibility_audit": {
+    "n_trigger_templates": 167,
+    "pred_positive_rate": 0.2762381190595298,
+    "precision": 0.9969214052879392,
+    "recall": 0.48859501198189403,
+    "f1": 0.6557865268926083,
+    "confusion_matrix_tn_fp_fn_tp": [
+      8706,
+      17,
+      5762,
+      5505
+    ],
+    "trigger_rate_among_stored_positives": 0.48859501198189403,
+    "trigger_rate_among_stored_negatives": 0.0019488708013298177,
+    "note": "Predicts positive if any visible template matches keyword/status triggers; target is stored OR proxy labels. Measures observable proxy-related features, not SOC ground truth and not equivalent to k-of-L aggregation."
+  },
+  "commands": [
+    "python prototype/pipeline/reconstruct_line_labels.py",
+    "python prototype/pipeline/compute_k_of_l_table.py",
+    "python prototype/pipeline/test_label_aggregation.py"
+  ]
+}

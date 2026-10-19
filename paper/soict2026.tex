@@ -73,15 +73,15 @@ We report AUPRC lift over prevalence within each protocol, trivial baselines, an
 Campus IT services emit heterogeneous operational logs. Sequence detectors can score unusual template patterns~\cite{ref_deeplog,ref_loganomaly,ref_logrobust,ref_swisslog}, but archive packaging, duplicate backups, and heuristic labels can invent ``temporal'' structure that models then appear to learn. Prior empirical studies already show that training-data selection, grouping, class distribution, and noise strongly affect public LAD benchmarks~\cite{ref_le_zhang_2022,ref_albert_2025}. We extend that validity agenda to a setting those studies do not isolate: institutional \emph{backup archives} whose folder order is not event time, with exact raw-line contamination audits, OR-window prevalence inflation, and proxy-label/feature coupling.
 
 This paper treats those threats as first-class experimental objects. On HUFLIT selective extracts we ask three research questions:
-\textbf{(RQ1)}~How much do OR proxy window labels inflate prevalence and trivial F1 relative to stricter $k$-of-$L$ aggregations?
-\textbf{(RQ2)}~How do detector conclusions change between an archive-order split (Protocol~A) and a jointly decontaminated backup-day protocol (Protocol~B), and what does removing only exact-line deduplication change?
+\textbf{(RQ1)}~How much do OR proxy window labels inflate prevalence and trivial F1 relative to stricter $k$-of-$L$ aggregations of the \emph{same} raw-line proxy labels?
+\textbf{(RQ2)}~How do detector conclusions change between an archive-order split (Protocol~A) and a jointly decontaminated backup-day protocol (Protocol~B)?
 \textbf{(RQ3)}~Under these proxy labels, does adding a causal TCN to a masked Transformer improve ranking enough to justify its leave-one-out scoring cost?
 We survey a masked TCN--Transformer and a no-TCN ablation as \emph{evaluation targets}, not as a claimed architecture advance. We add trivial baselines (always-anomaly; no-skill AUPRC $=$ prevalence), report AUPRC lift $=$ AUPRC $-$ test prevalence \emph{within} each protocol, and treat validation-selected F1 thresholds as \emph{diagnostic} operating points only.
 
 The contributions are:
 \begin{itemize}
     \item \textbf{Validity protocol on campus archives}: measure OR-window prevalence inflation against an always-anomaly trivial baseline, audit exact raw-line and template-window contamination, and retain reproducible dual-protocol evaluation artifacts under heuristic proxy labels (not SOC ground truth).
-    \item \textbf{Joint decontamination protocol}: Protocol~B applies exact-line SHA-1 dedup, windows that never cross (backup-day, source, member), and backup-day holdout; we add a single-factor note on B without dedup and label-aggregation sensitivity ($k$-of-$L$). We do \emph{not} claim a full causal factorial over all three factors.
+    \item \textbf{Joint decontamination protocol}: Protocol~B applies exact-line SHA-1 dedup, windows that never cross (backup-day, source, member), and backup-day holdout, plus $k$-of-$L$ label-aggregation sensitivity on reconstructed line labels. We do \emph{not} claim a causal decomposition of the three Protocol~B factors.
     \item \textbf{Threshold-aware reading}: fixed $\mu{+}3\sigma$ versus validation-selected F1 thresholds with precision/recall, separating ranking from calibration; validation-tuned F1 is not a deployable operating point.
     \item \textbf{Surveyed TCN evidence}: on these extracts and settings the TCN does not consistently beat a masked Transformer without TCN, while increasing leave-one-out scoring latency; keyword/status ablation shows only partial proxy-token leakage into PCA lift.
 \end{itemize}
@@ -144,7 +144,7 @@ The measured system has two stages:
 We survey a masked template language model as an evaluation target under proxy labels (not a claimed SOTA detector): 15\% of input tokens are replaced by a reserved mask token, representations pass through a Temporal Convolutional Network (TCN)~\cite{ref_tcn} and Transformer self-attention~\cite{ref_attention}, and a linear vocabulary head predicts the original identities only at selected positions.
 
 \subsubsection{Embedding and Dynamic Masking}
-A sliding window of length $L = 20$ with stride $S = 10$ extracts template sequences $\mathbf{X} = [T_1, T_2, \ldots, T_L]$. During training, 15\% of tokens are replaced with \texttt{[MASK]} ($ID = |\mathcal{V}|+1$), distinct from padding ($ID = 0$). Padding masks are applied in self-attention. Embeddings use sinusoidal positional encodings~\cite{ref_attention}:
+A sliding window of length $L = 20$ with stride $S = 10$ extracts template sequences $\mathbf{X} = [T_1, T_2, \ldots, T_L]$. During training, 15\% of tokens are replaced with \texttt{[MASK]} ($ID = |\mathcal{V}_{\mathrm{tok}}|+1$), distinct from padding ($ID = 0$). Padding masks are applied in self-attention. Embeddings use sinusoidal positional encodings~\cite{ref_attention}:
 \begin{equation}
     \mathbf{E} = \text{Embedding}(\mathbf{X}) + \mathbf{P}_{\text{pos}} \in \mathbb{R}^{L \times d_{\text{model}}}
 \end{equation}
@@ -159,13 +159,13 @@ Dilated causal convolutions~\cite{ref_tcn} with $d \in \{1, 2\}$ extract local p
 \end{equation}
 
 \subsubsection{Transformer Encoder and Scoring}
-A single Transformer encoder layer (pre-LN, multi-head attention, GELU FFN) contextualizes the sequence. Training minimizes masked cross-entropy. Let $\mathcal{V}$ be the set of non-padding positions and
+A single Transformer encoder layer (pre-LN, multi-head attention, GELU FFN) contextualizes the sequence. Training minimizes masked cross-entropy. Let $\mathcal{I}$ be the set of non-padding positions and
 \begin{equation}
     \mathbf{X}^{(-t)}=[T_1,\ldots,\texttt{[MASK]}_t,\ldots,T_L].
 \end{equation}
 Inference uses leave-one-position-out PLL:
 \begin{equation}
-    S(\mathbf{X}) = \frac{1}{|\mathcal{V}|} \sum_{t\in\mathcal{V}} -\log P(T_t \mid \mathbf{X}^{(-t)}).
+    S(\mathbf{X}) = \frac{1}{|\mathcal{I}|} \sum_{t\in\mathcal{I}} -\log P(T_t \mid \mathbf{X}^{(-t)}).
 \end{equation}
 The primary threshold is $\tau=\mu_{\mathrm{val}}+3\sigma_{\mathrm{val}}$ on nominal validation scores; as a diagnostic we also report a validation-selected F1 threshold applied to test scores. That diagnostic threshold is fixed before looking at test labels and is \emph{not} presented as a validated deployment operating point.
 
@@ -179,12 +179,12 @@ Records are ordered by backup day $\rightarrow$ ZIP $\rightarrow$ member $\right
 \subsection{Protocol B (dedup + source-bounded + backup-day holdout)}
 Protocol~B \emph{jointly} applies exact-line deduplication, boundary-safe windowing, and backup-day holdout; we therefore treat A$\rightarrow$B as a comparison of protocols, not a causal ablation of archive ordering alone. We keep the first SHA-1 of each \emph{raw line} ($262{,}194$ duplicates skipped while filling $1$M unique lines), emit windows only inside one (backup-day, source, member) group, and assign backup days $15$--$17$~Jun$\rightarrow$train, $18$~Jun$\rightarrow$val, $19$~Jun$\rightarrow$test. Day folders are backup collection periods, not verified per-event timestamps. Test-window prevalence is $56.36\%$ (always-anomaly F1 baseline $0.721$).
 
-Global exact-line deduplication may also remove legitimate repeated events that recur identically across backup days; we therefore treat it as a \emph{conservative decontamination} step that can alter the backup-day-held-out test distribution, and report this as an additional validity limitation rather than a claim that every duplicate is a backup artifact. Holding day split and source-bounded windows fixed, skipping exact-line deduplication retains those $262{,}194$ duplicate raw lines in the stream fill toward the $1$M cap and therefore changes which later unique lines enter the day-held-out partitions; we report this as a single-factor distributional caveat rather than a full re-leaderboard (full factorial ablations remain future work).
+Global exact-line deduplication may also remove legitimate repeated events that recur identically across backup days; we therefore treat it as a \emph{conservative decontamination} step that can alter the backup-day-held-out test distribution, not a claim that every duplicate is a backup artifact. We did \emph{not} run a controlled B-without-dedup re-leaderboard: under a fixed $1$M-line cap, disabling dedup would change which later records enter the day partitions, so causal attribution among deduplication, boundary-safe windows, and day holdout remains unresolved.
 
 Raw-line dedup does \emph{not} imply unique template windows. Exact template-ID window sequence overlap (SHA-1 of the integer window vector): $505$ of $11{,}065$ distinct validation windows ($4.56\%$) also occur in training, and $110$ of $11{,}137$ distinct test windows ($0.99\%$) also occur in training.\footnote{Split-overlap statistics appear in the dual-protocol evaluation metadata retained with the code artifact.}
 
 \subsection{Experimental Setup}
-Table~\ref{tab_setup} lists corpus settings for Protocol~B. Table~\ref{tab_baselines} summarizes shared baseline configurations. Protocol~A uses the same architectures on the earlier stream-position arrays. Training is nominal-only (proxy labels select the nominal subset and the nominal validation scores used for $\mu{+}3\sigma$); seeds $\{42,101,202,303,404\}$; hardware is CPU (PyTorch $2.8.0$+cpu, 2 intra-op threads). Masked models use AdamW ($10^{-3}$, weight decay $10^{-4}$), batch size $256$, $8$ epochs, gradient clip $1.0$, and early stop on nominal validation PLL when available; the encoder is one pre-LN Transformer layer ($d{=}128$, $4$ heads, FFN~$256$) unless noted as an ablation target.
+Table~\ref{tab_setup} lists corpus settings for Protocol~B. Table~\ref{tab_baselines} summarizes shared baseline configurations. Protocol~A uses the same architectures on the earlier stream-position arrays. Training is nominal-only (proxy labels select the nominal subset and the nominal validation scores used for $\mu{+}3\sigma$); seeds $\{42,101,202,303,404\}$; hardware is CPU (PyTorch $2.8.0$+cpu, 2 intra-op threads). Masked models use Adam ($10^{-3}$), batch size $256$, and a fixed $6$ epochs with no early stopping; the last-epoch weights are used for test scoring. The encoder is one pre-LN Transformer layer ($d{=}128$, $4$ heads, FFN~$256$) unless noted as an ablation target.
 
 \begin{table}[htbp]
 \caption{Protocol~B corpus setup. Window label $=$ OR over $L$ proxy line labels.}
@@ -231,7 +231,7 @@ Metrics: F1/precision/recall at $\mu{+}3\sigma$, ROC-AUC, AUPRC, and \textbf{AUP
 PCA & Count vectors; $n{=}32$ components (capped); PCA (\texttt{sklearn}; SVD solver); score $=$ reconstruction MSE. \\
 DeepLog-style$^\ast$ & Emb~$64$, LSTM hidden~$128$, $2$ layers; next-token CE; score $=$ mean next-token NLL; Adam $10^{-3}$; batch~$256$; $6$ epochs. \\
 LogAnomaly-lite & Emb+$2$-layer LSTM recon on template IDs only (no template2Vec; no quantitative branch); score $=$ mean token NLL; same optimizer. \\
-Masked Transformer & $d{=}128$, heads~$4$, $1$ layer, FFN~$256$, mask~$15\%$; AdamW $10^{-3}$; batch~$256$; $8$ epochs; score $=$ leave-one-out PLL. \\
+Masked Transformer & $d{=}128$, heads~$4$, $1$ layer, FFN~$256$, mask~$15\%$; Adam $10^{-3}$; batch~$256$; $6$ epochs (no early stop); score $=$ leave-one-out PLL. \\
 Masked TCN--Transformer & As above $+$ causal conv $k{=}3$, dilations $\{1,2\}$; same optimizer and PLL score. \\
 Primary / diagnostic thr. & $\mu_{\mathrm{val}}{+}3\sigma_{\mathrm{val}}$ on nominal val; validation-F1-selected threshold, fixed before test evaluation (diagnostic only). \\
 \bottomrule
@@ -262,7 +262,7 @@ On Protocol~A, the DeepLog-style LSTM leads ROC-AUC ($0.781$); LogAnomaly-lite i
 
 On Protocol~B (Table~\ref{tab_v2}), DeepLog-style and LogAnomaly-lite retain the strongest mean AUPRC lifts ($+0.138$ and $+0.112$), but with large seed variance (DeepLog-style ROC-AUC $0.657\pm0.134$). Masked models lose backup-day ranking (AUC$\approx0.49$--$0.53$). PCA keeps a smaller but more stable lift ($+0.098$). Table~\ref{tab_thr}: $\mu{+}3\sigma$ starves recall for most detectors (PCA/DeepLog-style/masked Transformer recall $\approx0$--$0.01$), while thresholds selected on validation and evaluated on \emph{test} recover F1$\approx0.73$--$0.75$---near the always-anomaly test baseline ($0.721$)---showing that much of the apparent F1 gain is driven by prevalence and threshold calibration rather than strong ranking quality. Under Protocol~B, the surveyed TCN remains slower ($51$ vs.\ $19$~ms) without consistent accuracy gains on this held-out backup day.
 
-Table~\ref{tab_label_sens} summarizes label-aggregation sensitivity. Replacing OR stored labels with a $1$-of-$L$ trigger-template count nearly halves Protocol~B test prevalence ($0.564\rightarrow0.276$) and always-anomaly F1 ($0.721\rightarrow0.433$), confirming that aggregation choice is a first-order driver of trivial baselines. Raising $k$ to $2$ or $3$ barely changes prevalence further because trigger-positive windows usually contain multiple matching positions. A rule that reapplies the same $k$-of-$L$ definition used to build those labels achieves F1$=1$ by construction; we report it only as a proxy-consistency check.
+Table~\ref{tab_label_sens} reports a corrected $k$-of-$L$ sensitivity on reconstructed raw-line proxy labels for Protocol~B test windows: $k{=}1$ is identical to the stored OR labels by construction (exact OR match after a label-only rebuild of the Protocol~B stream). Raising $k$ to $2$ and $3$ reduces prevalence from $0.564$ to $0.453$ and $0.387$, and always-anomaly F1 from $0.721$ to $0.623$ and $0.558$. PCA scores are fitted once under OR-nominal training (seed~$42$) and held fixed across label definitions, so the lift changes reflect label aggregation rather than retraining. Separately, predicting stored OR labels from visible keyword/status trigger templates yields high precision but only moderate recall ($F1{\approx}0.656$), indicating that some---but not all---proxy-positive windows remain observable after parsing.
 
 Table~\ref{tab_ablation}: remapping $167$ proxy-trigger templates ($\approx9.3\%$ of test tokens) to padding in train/val/test, then refitting PCA and retraining the masked Transformer, reduces PCA lift from $+0.098$ to $+0.084$ without collapsing ranking to chance, while the masked Transformer stays near chance before and after ablation. This is therefore a \emph{retrained} sensitivity analysis rather than a scoring-time-only probe. Trigger templates are those whose template string matches a status/keyword pattern used by the proxy-labeling rules (HTTP $4$xx/$5$xx and deny/block/error-like tokens). For the masked models, remapping to padding removes these positions from attention and from the PLL average rather than introducing a dedicated ablation token; for PCA, pad IDs are simply omitted from the count vector. Residual correlation remains after template-level trigger ablation; without SOC labels, it cannot be interpreted as validated operational anomaly signal.
 
@@ -313,7 +313,7 @@ Masked TCN--Transformer & $0.151\pm0.183$ & $0.532\pm0.112$ & $0.557\pm0.124$ & 
 \end{table}
 
 \begin{table}[htbp]
-\caption{Protocol~B label-aggregation sensitivity on the held-out test day ($L{=}20$). OR uses stored proxy window labels. $k$-of-$L$ counts templates matching the same keyword/status patterns as the proxy rules (167 triggers). Rule-oracle F1$=1$ reapplies the labeling definition and is a consistency check only. PCA lift $=$ AUPRC $-$ prevalence under that label definition (seed~$42$).}
+\caption{Protocol~B $k$-of-$L$ sensitivity on reconstructed raw-line proxy labels ($L{=}20$, $N{=}19{,}990$ test windows). $k{=}1$ equals stored OR labels exactly. PCA scores are fixed (seed~$42$; fit on OR-nominal train); lift $=$ AUPRC $-$ prevalence under each label definition.}
 \label{tab_label_sens}
 \centering
 \setlength{\tabcolsep}{3pt}
@@ -321,12 +321,11 @@ Masked TCN--Transformer & $0.151\pm0.183$ & $0.532\pm0.112$ & $0.557\pm0.124$ & 
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{l c c c c c}
 \toprule
-\textbf{Aggregation} & \textbf{Prev.} & \textbf{Always-anom.\ F1} & \textbf{PCA AUC} & \textbf{PCA lift} & \textbf{Rule-oracle F1} \\
+\textbf{Aggregation} & \textbf{$n^+$} & \textbf{Prev.} & \textbf{Always-anom.\ F1} & \textbf{PCA AUC} & \textbf{PCA lift} \\
 \midrule
-OR (stored proxy) & $0.564$ & $0.721$ & $0.619$ & $+0.090$ & --- \\
-$1$-of-$L$ (trigger) & $0.276$ & $0.433$ & $0.825$ & $+0.302$ & $1.000$ \\
-$2$-of-$L$ (trigger) & $0.276$ & $0.432$ & $0.825$ & $+0.303$ & $1.000$ \\
-$3$-of-$L$ (trigger) & $0.274$ & $0.430$ & $0.825$ & $+0.303$ & $1.000$ \\
+$1$-of-$L$ ($=$ OR) & $11{,}267$ & $0.564$ & $0.721$ & $0.619$ & $+0.090$ \\
+$2$-of-$L$ & $9{,}051$ & $0.453$ & $0.623$ & $0.659$ & $+0.136$ \\
+$3$-of-$L$ & $7{,}742$ & $0.387$ & $0.558$ & $0.701$ & $+0.179$ \\
 \bottomrule
 \end{tabular}%
 }
@@ -372,22 +371,24 @@ Masked TCN--Transformer & $0.151$ & $0.354$ & $0.102$ & $0.741$ & $0.608$ & $0.9
 \end{table}
 
 \section{Discussion \& Threats to Validity}
-\textbf{What sequence means}: Protocol~A orders archive members, not wall-clock events. Protocol~B jointly removes cross-member windows and duplicate raw lines but still uses backup-day folders rather than verified timestamps. Seed variance does not capture day-to-day sampling uncertainty because Protocol~B contains a single held-out backup day; we did not claim multi-day generalization.
+\textbf{What sequence means}: Protocol~A orders archive members, not wall-clock events. Protocol~B jointly removes cross-member windows and duplicate raw lines but still uses backup-day folders rather than verified timestamps. Seed variance does not capture day-to-day sampling uncertainty because Protocol~B contains a single held-out backup day; we do not claim multi-day generalization.
 
-\textbf{Window OR labels}: OR aggregation manufactures high prevalence and makes the always-anomaly F1 baseline a necessary reference (not an upper bound: a perfect detector still has F1$=1$). Ranking metrics and lift-over-prevalence must accompany thresholded F1; AUPRC lift $=$ AUPRC $-$ test prevalence is interpreted within each protocol and not directly compared across prevalences.
+\textbf{Window OR labels}: OR aggregation manufactures high prevalence and makes the always-anomaly F1 baseline a necessary reference (not an upper bound: a perfect detector still has F1$=1$). Ranking metrics and lift-over-prevalence must accompany thresholded F1; AUPRC lift $=$ AUPRC $-$ test prevalence is interpreted within each protocol and not directly compared across prevalences. Table~\ref{tab_label_sens} shows that stricter $k$-of-$L$ aggregations of the \emph{same} line labels moderately reduce prevalence and trivial F1.
 
-\textbf{Proxy labels and label--feature coupling}: HTTP status tokens, deny/block fields, and keyword heuristics both \emph{define} proxy labels and often remain visible in template text. Proxy labels also select nominal-only training windows and the nominal validation scores used for $\mu{+}3\sigma$. Models may therefore learn the labeling rule rather than operational anomalies. Our keyword/status template ablation (Table~\ref{tab_ablation}) and $k$-of-$L$ sensitivity (Table~\ref{tab_label_sens}) support prevalence/leakage analysis without claiming residual operational signal. Gold SOC labels remain required before operational claims.
+\textbf{Proxy labels and label--feature coupling}: HTTP status tokens, deny/block fields, and keyword heuristics both \emph{define} proxy labels and often remain visible in template text. Proxy labels also select nominal-only training windows and the nominal validation scores used for $\mu{+}3\sigma$. Models may therefore learn the labeling rule rather than operational anomalies. Our keyword/status template ablation (Table~\ref{tab_ablation}), $k$-of-$L$ sensitivity (Table~\ref{tab_label_sens}), and trigger-visibility audit support prevalence/observability analysis without claiming residual operational signal. Gold SOC labels remain required before operational claims.
 
 \textbf{Parser}: The custom parser has no gold template annotations; the $0.5$ merge threshold lacks a full sensitivity sweep in this revision, and parser merge errors may alter event frequency and sequence structure~\cite{ref_le_zhang_2022}.
 
 \textbf{Corpus selection}: Skipping FortiGate CSV and ${>}500$~MiB members is a deliberate selective-ingest policy (schema mismatch and compute bound), not a claim of full-archive coverage.
+
+\textbf{Latency}: Batch-1 PLL for the no-TCN Transformer differs substantially between Protocol~A (${\approx}2$~ms) and Protocol~B (${\approx}19$~ms) under the same window length; TCN timings remain ${\approx}51$--$53$~ms. We report measured values and do not interpret the A$\leftrightarrow$B no-TCN gap as a model-capacity effect without further microbenchmarking.
 
 \textbf{TCN scope}: Negative evidence for the surveyed one-layer masked TCN--Transformer applies to these HUFLIT extracts, proxy labels, and training settings; it is not a general claim that TCN architectures cannot help elsewhere.
 
 \textbf{Ethics}: Campus telemetry stays private; any future release needs redaction and authorization.
 
 \section{Conclusion}
-We framed HUFLIT campus-log evaluation as a \emph{validity} study under heuristic proxy labels. OR window labels inflate prevalence and make thresholded F1 look stronger than ranking warrants; a jointly decontaminated backup-day protocol changes conclusions relative to an archive-ordered stream split; and the surveyed masked TCN--Transformer adds leave-one-out latency without a reliable benefit on the evaluated Protocol~B held-out day. Label-aggregation sensitivity shows that moving from OR to $k{\ge}2$ sharply reduces trivial baselines. We do not claim SOC-verified incident detection or multi-day generalization. Future work: fuller factorized protocol ablations, additional backup-day folds, event timestamps, SOC labels, parser-threshold sweeps, and Loghub~\cite{ref_loghub} sanity checks under the same harness.
+We framed HUFLIT campus-log evaluation as a \emph{validity} study under heuristic proxy labels. OR window labels inflate prevalence and make thresholded F1 look stronger than ranking warrants; a jointly decontaminated backup-day protocol changes conclusions relative to an archive-ordered stream split; and the surveyed masked TCN--Transformer adds leave-one-out latency without a reliable benefit on the evaluated Protocol~B held-out day. Corrected $k$-of-$L$ sensitivity on reconstructed line labels shows that moving from OR ($k{=}1$) to $k{=}2$/$3$ moderately reduces prevalence and always-anomaly F1 without changing the underlying proxy rule. We do not claim SOC-verified incident detection, multi-day generalization, or a causal single-factor ablation of Protocol~B. Future work: factorized protocol ablations, additional backup-day folds, event timestamps, SOC labels, parser-threshold sweeps, and Loghub~\cite{ref_loghub} sanity checks under the same harness.
 
 \section*{Acknowledgment}
 The authors thank the Faculty of Information Technology, Ho Chi Minh City University of Foreign Languages - Information Technology (HUFLIT), Ho Chi Minh City, Vietnam for providing the production campus log telemetry and computing infrastructure. Generative AI tools were used for literature discovery, consistency checking, and language refinement. All cited sources were independently verified by the authors. Study design, implementation, experimental execution, statistical analysis, interpretation, and final scholarly judgments were performed and approved by the authors.

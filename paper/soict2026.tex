@@ -14,6 +14,7 @@
 \usepackage{xurl}
 \MakeRobust{\url}
 \usepackage{etoolbox}
+\usepackage{placeins}
 
 \makeatletter
 % Pack float-only pages at the top instead of stretching tables apart.
@@ -63,7 +64,7 @@ On selective HUFLIT campus backup extracts we treat evaluation validity as the p
 (A)~an archive\nobreakdash-order stream split with validation contamination against
 (B)~a jointly decontaminated protocol (exact\nobreakdash-line deduplication, source\nobreakdash-bounded windows, backup\nobreakdash-day holdout) under HTTP/keyword \emph{proxy} labels---not SOC ground truth.
 Three findings dominate: OR window labels inflate prevalence (Protocol~A test rate $80.5\%$; always\nobreakdash-anomaly F1${\approx}0.892$);
-switching protocols changes detector rankings and lifts; and an evaluated masked TCN--Transformer adds leave\nobreakdash-one\nobreakdash-out scoring latency without a reliable accuracy gain on these extracts.
+switching protocols changes detector rankings and lifts; and the evaluated masked TCN--Transformer adds leave\nobreakdash-one\nobreakdash-out scoring latency without a reliable accuracy gain on these extracts.
 We report AUPRC lift over prevalence within each protocol, trivial baselines, and label\nobreakdash-aggregation sensitivity; we do \emph{not} claim operational incident detection.
 \keywords{AIOps \and Log Anomaly Detection \and Proxy Labels \and Experimental Validity \and TCN--Transformer \and Campus Infrastructure.}
 \end{abstract}
@@ -82,7 +83,7 @@ The contributions are:
     \item \textbf{Validity protocol on campus archives}: measure OR-window prevalence inflation against an always-anomaly trivial baseline, audit exact raw-line and template-window contamination, and retain reproducible dual-protocol evaluation artifacts under heuristic proxy labels (not SOC ground truth).
     \item \textbf{Joint decontamination protocol}: Protocol~B applies exact-line SHA-1 dedup, windows that never cross (backup-day, source, member), and backup-day holdout, plus $k$-of-$L$ label-aggregation sensitivity on reconstructed line labels. We do \emph{not} claim a causal decomposition of the three Protocol~B factors.
     \item \textbf{Threshold-aware reading}: fixed $\mu{+}3\sigma$ versus validation-selected F1 thresholds with precision/recall, separating ranking from calibration; validation-tuned F1 is not a deployable operating point.
-    \item \textbf{Evaluated TCN evidence}: on these extracts and settings the TCN does not consistently beat a masked Transformer without TCN, while increasing leave-one-out scoring latency; keyword/status ablation shows only partial proxy-token leakage into PCA lift.
+    \item \textbf{TCN ablation findings}: on these extracts and settings the TCN does not consistently beat a masked Transformer without TCN, while increasing leave-one-out scoring latency; keyword/status ablation shows only partial proxy-token leakage into PCA lift.
 \end{itemize}
 
 \paragraph{Relation to an accepted companion study.}
@@ -213,7 +214,7 @@ Hardware & CPU, 2 PyTorch threads \\
 We evaluate five detector families: PCA count-vector reconstruction~\cite{ref_pca}, a DeepLog-style LSTM~\cite{ref_deeplog}, LogAnomaly-lite~\cite{ref_loganomaly}, a masked Transformer without TCN, and a masked TCN--Transformer on the same window arrays within each protocol.
 Metrics: F1/precision/recall at $\mu{+}3\sigma$, ROC-AUC, AUPRC, and \textbf{AUPRC lift} $=$ AUPRC $-$ test prevalence (within each protocol), always-anomaly F1 baseline, and batch-1 PLL latency (masked models only).
 
-\begin{table}[t]
+\begin{table}[!htbp]
 \caption{Baseline and masked-model configuration (both protocols unless noted).}
 \label{tab_baselines}
 \centering
@@ -237,6 +238,12 @@ Primary / diagnostic thr. & $\mu_{\mathrm{val}}{+}3\sigma_{\mathrm{val}}$ on nom
 {\footnotesize $^\ast$Our DeepLog-style reimplementation uses mean next-token NLL for continuous ranking and threshold evaluation rather than the original top-$g$ decision rule~\cite{ref_deeplog}. Lift $=$ AUPRC $-$ test prevalence within the same protocol.}
 \end{table}
 
+\FloatBarrier
+\subsection{Results}
+On Protocol~A, the DeepLog-style LSTM leads ROC-AUC ($0.781$); LogAnomaly-lite is close ($0.777$). Under these extracts and settings, the evaluated TCN is \emph{worse} than no-TCN on mean F1/AUC and much slower at batch-1 PLL. The always-anomaly F1 baseline ($0.892$) exceeds every learned F1 at $\mu{+}3\sigma$; AUPRC must be read against prevalence $0.805$ (lift $=$ AUPRC $-$ prevalence within Protocol~A).
+
+On Protocol~B (Table~\ref{tab_v2}), DeepLog-style and LogAnomaly-lite retain the strongest mean AUPRC lifts ($+0.138$ and $+0.112$), but with large seed variance (DeepLog-style ROC-AUC $0.657\pm0.134$). Masked models lose backup-day ranking (AUC$\approx0.49$--$0.53$). PCA keeps a smaller but more stable lift ($+0.098$). Table~\ref{tab_thr}: $\mu{+}3\sigma$ starves recall for most detectors (PCA/DeepLog-style/masked Transformer recall $\approx0$--$0.01$), while thresholds selected on validation and evaluated on \emph{test} recover F1$\approx0.73$--$0.75$---near the always-anomaly test baseline ($0.721$)---showing that much of the apparent F1 gain is driven by prevalence and threshold calibration rather than strong ranking quality. Under Protocol~B, the evaluated TCN remains slower ($51$ vs.\ $19$~ms) without consistent accuracy gains on this held-out backup day.
+
 \begin{figure*}[t]
 \centering
 \begin{minipage}{0.48\textwidth}
@@ -252,11 +259,6 @@ Primary / diagnostic thr. & $\mu_{\mathrm{val}}{+}3\sigma_{\mathrm{val}}$ on nom
   \label{fig_triage}
 \end{minipage}
 \end{figure*}
-
-\subsection{Results}
-On Protocol~A, the DeepLog-style LSTM leads ROC-AUC ($0.781$); LogAnomaly-lite is close ($0.777$). Under these extracts and settings, the evaluated TCN is \emph{worse} than no-TCN on mean F1/AUC and much slower at batch-1 PLL. The always-anomaly F1 baseline ($0.892$) exceeds every learned F1 at $\mu{+}3\sigma$; AUPRC must be read against prevalence $0.805$ (lift $=$ AUPRC $-$ prevalence within Protocol~A).
-
-On Protocol~B (Table~\ref{tab_v2}), DeepLog-style and LogAnomaly-lite retain the strongest mean AUPRC lifts ($+0.138$ and $+0.112$), but with large seed variance (DeepLog-style ROC-AUC $0.657\pm0.134$). Masked models lose backup-day ranking (AUC$\approx0.49$--$0.53$). PCA keeps a smaller but more stable lift ($+0.098$). Table~\ref{tab_thr}: $\mu{+}3\sigma$ starves recall for most detectors (PCA/DeepLog-style/masked Transformer recall $\approx0$--$0.01$), while thresholds selected on validation and evaluated on \emph{test} recover F1$\approx0.73$--$0.75$---near the always-anomaly test baseline ($0.721$)---showing that much of the apparent F1 gain is driven by prevalence and threshold calibration rather than strong ranking quality. Under Protocol~B, the evaluated TCN remains slower ($51$ vs.\ $19$~ms) without consistent accuracy gains on this held-out backup day.
 
 Table~\ref{tab_label_sens} reports $k$-of-$L$ sensitivity on reconstructed raw-line proxy labels: $k{=}1$ matches stored OR labels exactly. Raising $k$ to $2$ and $3$ reduces prevalence from $0.564$ to $0.453$ and $0.387$, and always-anomaly F1 from $0.721$ to $0.623$ and $0.558$. PCA scores are fitted once under OR-nominal training (seed~$42$) and held fixed across label definitions. Against the original stored OR proxy labels, the template-trigger detector achieves precision $0.997$, recall $0.489$, and F1~$0.656$, indicating that label-defining cues remain partially visible after parsing. This measures proxy-label observability, not verified operational anomaly detection.
 

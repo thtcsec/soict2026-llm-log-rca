@@ -22,7 +22,7 @@
 |---|---|
 | **Title** | *Campus Log Anomaly Detection under Proxy Labels: Validity Limits of Archive Splits and Masked TCN–Transformers* |
 | **Track** | Software Engineering, Trusted Digital Platforms, and Smart Services (Secondary: Applied AI) |
-| **Authors** | Hoang Tu Trinh∗, Tien Thanh Cao, Manh Ha Tran (PGS.TS) |
+| **Authors** | Hoang Tu Trinh∗, Thanh Tien Cao, Ha Manh Tran (PGS.TS) |
 | **Affiliation** | Faculty of Information Technology, HUFLIT |
 | **Artifact** | https://github.com/thtcsec/soict2026-llm-log-rca (**private**) |
 | **Measured result (corrected)** | TCN–Transformer F1 **0.0395±0.0163**, AUC **0.7226±0.0178**; masked Transformer without TCN F1 **0.3475±0.4097**, AUC **0.7685±0.0351** |

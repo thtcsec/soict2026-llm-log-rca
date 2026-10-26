@@ -27,7 +27,7 @@
 | **Artifact** | https://github.com/thtcsec/soict2026-llm-log-rca |
 | **Measured result (corrected)** | TCN–Transformer F1 **0.0395±0.0163**, AUC **0.7226±0.0178**; masked Transformer without TCN F1 **0.3475±0.4097**, AUC **0.7685±0.0351** |
 | **Validity scope** | HUFLIT selective stream: 1,000,000 lines; heuristic proxy labels; stream-position split with documented duplicate-backup overlap |
-| **Venue** | Ho Chi Minh City, Vietnam — December 4–5, 2026 |
+| **Venue** | Vung Tau, Ho Chi Minh City, Vietnam — December 4–5, 2026 |
 | **Submission Deadline** | Full Paper: September 16, 2026 |
 
 ---

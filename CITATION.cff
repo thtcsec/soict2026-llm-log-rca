@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "If you use this research software or paper, please cite it as below."
+authors:
+  - family-names: "Trinh"
+    given-names: "Hoang Tu"
+    email: "23dh113972@st.huflit.edu.vn"
+    affiliation: "Faculty of Information Technology, Ho Chi Minh City University of Foreign Languages -- Information Technology"
+  - family-names: "Cao"
+    given-names: "Thanh Tien"
+    email: "thanhct@huflit.edu.vn"
+    affiliation: "Faculty of Information Technology, Ho Chi Minh City University of Foreign Languages -- Information Technology"
+  - family-names: "Tran"
+    given-names: "Ha Manh"
+    email: "hatm@huflit.edu.vn"
+    affiliation: "Faculty of Information Technology, Ho Chi Minh City University of Foreign Languages -- Information Technology"
+title: "Campus Log Anomaly Detection under Proxy Labels: Validity Limits of Archive Splits and Masked TCN-Transformers"
+version: "1.0.0"
+date-released: "2026-10-27"
+url: "https://github.com/thtcsec/soict2026-llm-log-rca"
+repository-code: "https://github.com/thtcsec/soict2026-llm-log-rca"
+license: MIT
+preferred-citation:
+  type: conference-paper
+  authors:
+    - family-names: "Trinh"
+      given-names: "Hoang Tu"
+    - family-names: "Cao"
+      given-names: "Thanh Tien"
+    - family-names: "Tran"
+      given-names: "Ha Manh"
+  title: "Campus Log Anomaly Detection under Proxy Labels: Validity Limits of Archive Splits and Masked TCN-Transformers"
+  collection-title: "Proceedings of the 15th International Symposium on Information and Communication Technology (SOICT 2026)"
+  conference:
+    name: "The 15th International Symposium on Information and Communication Technology (SOICT 2026)"
+    city: "Ho Chi Minh City"
+    country: "VN"
+    date-start: "2026-12-04"
+    date-end: "2026-12-05"
+  year: 2026
+  status: in-press
+  url: "https://github.com/thtcsec/soict2026-llm-log-rca"

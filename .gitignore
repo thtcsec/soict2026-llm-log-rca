@@ -1,5 +1,5 @@
 # ============================================================
-# SOICT 2026 - LLM-Augmented Log Anomaly Detection & RCA
+# SOICT 2026 - Campus log anomaly detection under proxy labels
 # .gitignore
 # ============================================================
 
@@ -58,7 +58,7 @@ paper/*.blg
 paper/*.bbl
 paper/*.bcf
 paper/*.run.xml
-!paper/soict2026.pdf
+paper/*.pdf
 
 # --- IDE & OS ---
 .vscode/

@@ -2,135 +2,82 @@
   <img src="assets/soict-hust.png" height="80" alt="HUST SOICT Logo" />
   &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="assets/hcmus.png" height="80" alt="HCMUS VNU-HCM Logo" />
+  <br />
+  <sub>Conference organizers. Authors are affiliated with HUFLIT, not HUST or HCMUS.</sub>
 </p>
 
-<h1 align="center">SOICT 2026 — Campus Log Anomaly Detection under Proxy Labels</h1>
+<h1 align="center">Campus Log Anomaly Detection under Proxy Labels</h1>
+<p align="center"><em>Validity limits of archive splits and masked TCN–Transformers</em></p>
 
 <p align="center">
-  <a href="https://soict.org"><img src="https://img.shields.io/badge/Conference-SOICT%202026-0066CC.svg" alt="Conference" /></a>
-  <a href="https://soict.org"><img src="https://img.shields.io/badge/Organizers-HUST%20%7C%20VNU--HCMUS-CC0000.svg" alt="Organizers" /></a>
-  <a href="https://springer.com"><img src="https://img.shields.io/badge/Proceedings-Springer%20CCIS-FF6600.svg" alt="Proceedings" /></a>
-  <img src="https://img.shields.io/badge/Indexing-Scopus%20%7C%20EI%20Compendex-6A0DAD.svg" alt="Indexing" />
-  <img src="https://img.shields.io/badge/Status-Integrity%20hardening-orange.svg" alt="Status" />
+  <a href="https://soict.org"><img src="https://img.shields.io/badge/SOICT-2026-0066CC.svg" alt="SOICT 2026" /></a>
+  <a href="https://github.com/thtcsec/soict2026-llm-log-rca/tree/soict2026-camera-ready"><img src="https://img.shields.io/badge/artifact-camera--ready-2ea44f.svg" alt="Camera-ready artifact tag" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/code%20license-MIT-blue.svg" alt="MIT license" /></a>
+  <a href="ARTIFACT.md"><img src="https://img.shields.io/badge/reproducibility-tables-informational.svg" alt="Tracked metric tables" /></a>
 </p>
 
----
+## Paper metadata
 
-## 📌 Paper Metadata
-
-| Field | Info |
+| Field | Record |
 |---|---|
 | **Title** | *Campus Log Anomaly Detection under Proxy Labels: Validity Limits of Archive Splits and Masked TCN–Transformers* |
-| **Track** | Software Engineering, Trusted Digital Platforms, and Smart Services (Secondary: Applied AI) |
-| **Authors** | Hoang Tu Trinh∗, Thanh Tien Cao, Ha Manh Tran (PGS.TS) |
+| **Authors** | Hoang Tu Trinh, Thanh Tien Cao, and Ha Manh Tran* |
 | **Affiliation** | Faculty of Information Technology, HUFLIT |
-| **Artifact** | https://github.com/thtcsec/soict2026-llm-log-rca |
-| **Measured result (corrected)** | TCN–Transformer F1 **0.0395±0.0163**, AUC **0.7226±0.0178**; masked Transformer without TCN F1 **0.3475±0.4097**, AUC **0.7685±0.0351** |
-| **Validity scope** | HUFLIT selective stream: 1,000,000 lines; heuristic proxy labels; stream-position split with documented duplicate-backup overlap |
-| **Venue** | Vung Tau, Ho Chi Minh City, Vietnam — December 4–5, 2026 |
-| **Submission Deadline** | Full Paper: September 16, 2026 |
+| **Venue** | SOICT 2026, Vung Tau / Ho Chi Minh City, 4–5 December 2026 |
+| **Track** | Software Engineering, Trusted Digital Platforms, and Smart Services |
+| **Status** | Accepted; Springer CCIS forthcoming. No DOI is claimed. |
+| **Artifact tag** | [`soict2026-camera-ready`](https://github.com/thtcsec/soict2026-llm-log-rca/tree/soict2026-camera-ready) |
+| **Code license** | MIT (`LICENSE`). Campus raw logs are not released. |
 
----
+\*Corresponding author: `hatm@huflit.edu.vn`
 
-## 💡 Overview
+## Overview
 
-Modern enterprise campus networks generate massive volumes of heterogeneous, unstructured log streams. While deep learning models achieve high accuracy in sequence anomaly detection, traditional AIOps platforms suffer from a **critical explainability bottleneck**: raw anomaly scores fail to communicate actionable root causes, forcing SOC analysts to manually triage thousands of log messages.
+Archive packaging and heuristic proxy labels can make log anomaly evaluation look stronger than ranking warrants. On selective HUFLIT backup extracts we compare an archive-order split (Protocol A) with a jointly decontaminated backup-day protocol (Protocol B) under HTTP/keyword proxy labels — **not** SOC ground truth.
 
-This repository evaluates a detector and documents an **unevaluated RCA design**. It does not claim a deployed end-to-end LLM system:
+The parser is a **custom similarity parser**, not Drain3. We do not claim GraphWalk contributions and do not reuse CSoNet tables. We do **not** claim operational incident detection or a measured LLM/RCA system.
 
-```
-[Selective campus stream: 1,000,000 lines]
-        │
-        ▼
-┌─────────────────────────────┐
-│  Stage 1: Similarity Parser │  ← Custom template extraction (not Drain3)
-└─────────────┬───────────────┘
-              │ Template ID sequences
-              ▼
-┌─────────────────────────────┐
-│  Stage 2: TCN-Transformer   │  ← Masked-token anomaly detection with PLL
-│  Detector                   │
-└─────────────┬───────────────┘
-              │ Anomaly score > threshold
-              ▼
-┌─────────────────────────────┐
-│  Stage 3: RCA Design Mock   │  ← Prompt/schema only; no measured LLM or RAG
-│  (unevaluated)              │
-└─────────────────────────────┘
-```
+## Headline results
 
----
+| Setting | F1 | AUC |
+|---|---|---|
+| Masked TCN–Transformer | 0.0395±0.0163 | 0.7226±0.0178 |
+| Masked Transformer without TCN | 0.3475±0.4097 | 0.7685±0.0351 |
+| Protocol A always-anomaly baseline | ≈0.892 | — (prevalence 80.5%) |
 
-## 📊 Datasets
+Switching protocols changes detector rankings. The TCN branch does not justify its leave-one-out scoring cost on these extracts.
 
-| Dataset | Source | Size | Scope |
-|---|---|---|---|
-| **HUFLIT Campus Logs** | Internal production selective stream | 1,000,000 lines / 368,940,230 streamed bytes | Five backup days; proxy labels; not publicly released |
-
-The current paper does not report BGL, HDFS, or UNSW-NB15 measurements.
-
----
-
-## 🏗️ Repository Structure
-
-```
-soict2026-llm-log-rca/
-├── assets/                  # Conference logos (HUST SOICT, HCMUS)
-├── data/
-│   ├── raw/                 # Raw log files (excluded from Git via .gitignore)
-│   └── processed/           # Parsed templates & sequence vectors
-├── prototype/
-│   ├── drain3/              # Legacy simplified parser (not Drain3 package)
-│   ├── pipeline/            # Masked TCN-Transformer detector
-│   └── llm/                 # Unevaluated RCA prompt/schema mock
-├── results/
-│   ├── figures/             # 300 DPI publication graphics
-│   └── tables/              # Evaluation CSV metrics
-├── paper/
-│   ├── soict2026.tex        # Main Springer CCIS LaTeX manuscript
-│   ├── soict2026.pdf        # Compiled preview PDF
-│   └── figures/             # Embedded paper graphics
-├── references/              # Related papers & literature
-├── requirements.txt
-├── run.sh                   # 1-click pipeline execution
-└── soict2026_outline.md     # Detailed research outline & timeline
-```
-
----
-
-## 🚀 Quickstart
+## Reproduce
 
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
-
-# 2. Place raw logs in data/raw/ (see data/raw/README.md)
-
-# 3. Re-run only measured baselines from existing processed arrays (2 CPU threads)
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+python -m pip install -r requirements.txt
 python prototype/pipeline/run_baselines_huflit.py --threads 2
 ```
 
-The raw-ingest script excludes every FortiGate member by default. Do not use
-`--include_fortigate` on machines where archive I/O causes thermal or disk stress.
+Raw logs stay in `data/raw/` (gitignored). Metric dumps: `results/tables/`. Source: `paper/soict2026.tex`. PDF after SpringerLink.
 
----
+See `SUBMISSION_INTEGRITY.md` for the CSoNet companion disclosure.
 
-## 📄 BibTeX Citation
+## Limitations
+
+Proxy labels are export heuristics. Protocol B's three decontamination factors are not a causal decomposition. Validation-tuned F1 is diagnostic, not a deployable operating point.
+
+## Citation
 
 ```bibtex
-@article{tu2026soict,
-  title={Campus Log Anomaly Detection under Proxy Labels: A TCN--Transformer Study
-         and Design for Local RCA Narration},
-  author={Trinh, Tu Hoang and Cao, Thanh Tien and Tran, Ha Manh},
-  journal={Manuscript in preparation for the 15th International Symposium on Information
-           and Communication Technology (SOICT 2026)},
-  year={2026},
-  note={Springer CCIS; not yet submitted}
+@inproceedings{trinh2026proxylabels,
+  author    = {Hoang Tu Trinh and Thanh Tien Cao and Ha Manh Tran},
+  title     = {Campus Log Anomaly Detection under Proxy Labels: Validity Limits of Archive Splits and Masked TCN--Transformers},
+  booktitle = {Proc. 15th Int. Symp. Information and Communication Technology (SOICT)},
+  year      = {2026},
+  note      = {Accepted manuscript. Artifact: https://github.com/thtcsec/soict2026-llm-log-rca/tree/soict2026-camera-ready}
 }
 ```
 
----
+Machine-readable citation: [`CITATION.cff`](CITATION.cff). Evaluation protocol: [`ARTIFACT.md`](ARTIFACT.md).
 
-<p align="center">
-  <i>© 2026 Trinh, Cao &amp; Tran · Faculty of Information Technology, HUFLIT · All Rights Reserved</i>
-</p>
+## License
+
+Code is MIT. Do not redistribute HUFLIT campus logs from this repository.

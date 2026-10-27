@@ -1,0 +1,30 @@
+{
+  "title": "Campus Log Anomaly Detection under Proxy Labels: Validity Limits of Archive Splits and Masked TCN-Transformers",
+  "upload_type": "publication",
+  "publication_type": "conferencepaper",
+  "description": "Research artifact for SOICT 2026. Evaluation validity on HUFLIT campus backup archives under proxy labels. Custom similarity parser (not Drain3). No operational incident-detection claim. No Springer DOI is claimed.",
+  "creators": [
+    {
+      "name": "Trinh, Hoang Tu",
+      "affiliation": "Faculty of Information Technology, HUFLIT"
+    },
+    {
+      "name": "Cao, Thanh Tien",
+      "affiliation": "Faculty of Information Technology, HUFLIT"
+    },
+    {
+      "name": "Tran, Ha Manh",
+      "affiliation": "Faculty of Information Technology, HUFLIT"
+    }
+  ],
+  "access_right": "open",
+  "license": "MIT",
+  "keywords": [
+    "Log Anomaly Detection",
+    "Proxy Labels",
+    "Experimental Validity",
+    "TCN-Transformer",
+    "AIOps",
+    "SOICT 2026"
+  ]
+}
